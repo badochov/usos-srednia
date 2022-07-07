@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "content_scripts": [
+    {
+      "js": [
+        "content/index.ts"
+      ],
+      "matches": [
+        "https://usosweb.uw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index",
+        "https://usosweb.fuw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index",
+        "https://usosweb.mimuw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index"
+      ]
+    }
+  ],
+  "name": "USOS średnia"
+}
