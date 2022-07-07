@@ -1,12 +1,59 @@
+const includeInAverageText = 'W średniej'
+const averageRowClassName = 'average-row'
+const averageTbodyClassName = 'average-tbody'
+const averageInputClassName = 'include-in-average-checkbox'
+
 function main() {
   const gradesTable = getGradesTable()
   if (gradesTable === null) {
     return
   }
+  addCheckboxes(gradesTable)
+  handleAverages(gradesTable)
+}
+
+function handleAverages(gradesTable: HTMLTableElement) {
+  removeOld(gradesTable)
   const periodTables = getPeriodTables(gradesTable)
   periodTables.forEach(handlePeriod)
   handleGlobalAverage(periodTables.values(), gradesTable)
   handleYearlyAverage(periodTables, gradesTable)
+}
+
+function removeOld(table: HTMLTableElement) {
+  const rows = table.querySelectorAll(
+    `tr.${averageRowClassName}, tbody.${averageTbodyClassName}`,
+  )
+  for (const row of Array.from(rows)) {
+    row.remove()
+  }
+}
+
+function addCheckboxes(table: HTMLTableElement) {
+  const gradeTables = getPeriodGradesTables(table)
+  for (const tbody of Array.from(gradeTables)) {
+    for (const row of Array.from(tbody.rows)) {
+      const cell = row.insertCell()
+      const checkbox = document.createElement('input')
+      cell.appendChild(checkbox)
+      cell.style.textAlign = 'center'
+      cell.style.verticalAlign = 'middle'
+      checkbox.type = 'checkbox'
+      checkbox.checked = true
+      checkbox.onclick = () => handleAverages(table)
+      checkbox.classList.add(averageInputClassName)
+    }
+  }
+
+  const labelTables = getPeriodNamesTables(table)
+  for (const table of Array.from(labelTables)) {
+    for (const row of Array.from(table.rows)) {
+      const cell = row.insertCell()
+      const span = document.createElement('span')
+      cell.appendChild(span)
+      span.textContent = includeInAverageText
+    }
+  }
 }
 
 function handleYearlyAverage(
@@ -83,9 +130,14 @@ function formatAverageRow(
   avgCell.style.textAlign = 'right'
 
   labelCell.colSpan = 2
+
+  row.classList.add(averageRowClassName)
 }
 
 function formatAverage(avg: number): string {
+  if (isNaN(avg)) {
+    return '-'
+  }
   return avg.toFixed(2)
 }
 
@@ -129,21 +181,36 @@ function getGrades(table: HTMLTableSectionElement): number[] {
 
 function gradeCellToNumber(cell: HTMLTableCellElement): number {
   const text = cell.textContent ?? ''
-  const numsOnly = text.replace(/[^\d.,]/g, '')
+  const numsOnly = text.replace(/[^\d,()]/g, '')
   const normalized = numsOnly.replace(',', '.')
-  return parseFloat(normalized)
+  const grades = normalized.match(/\d+(.\d+)?/g) ?? []
+  const floats = []
+  for (const grade of grades) {
+    floats.push(parseFloat(grade))
+  }
+  return calcAverage(floats)
 }
 
 function getGradesCells(
   table: HTMLTableSectionElement,
-): NodeListOf<HTMLTableCellElement> {
-  return table.querySelectorAll('tr td:nth-child(3)')
+): HTMLTableCellElement[] {
+  const checkboxes = table.querySelectorAll(
+    `tr * input.${averageInputClassName}:checked`,
+  )
+  const res: HTMLTableCellElement[] = []
+  for (const checkbox of Array.from(checkboxes)) {
+    const row = <HTMLTableRowElement>checkbox.parentElement?.parentElement
+    const cell = row.cells[2]
+    res.push(cell)
+  }
+  return res
 }
 
 function addRowToGradesTable(
   gradesTable: HTMLTableElement,
 ): HTMLTableRowElement {
   const tbody = document.createElement('tbody')
+  tbody.classList.add(averageTbodyClassName)
   const row = tbody.insertRow()
   gradesTable.appendChild(tbody)
   return row
@@ -152,13 +219,9 @@ function addRowToGradesTable(
 function getPeriodTables(
   gradesTable: HTMLTableElement,
 ): Map<string, HTMLTableSectionElement> {
-  const periodNamesTables = <NodeListOf<HTMLTableSectionElement>>(
-    gradesTable.querySelectorAll('tbody:nth-child(odd)')
-  )
+  const periodNamesTables = getPeriodNamesTables(gradesTable)
   const names = Array.from(periodNamesTables).map(getPeriodName)
-  const periodGradesTables = <NodeListOf<HTMLTableSectionElement>>(
-    gradesTable.querySelectorAll('tbody:nth-child(even)')
-  )
+  const periodGradesTables = getPeriodGradesTables(gradesTable)
   const ret = new Map<string, HTMLTableSectionElement>()
   for (const i in names) {
     ret.set(names[i], periodGradesTables[i])
@@ -166,9 +229,21 @@ function getPeriodTables(
   return ret
 }
 
+function getPeriodGradesTables(
+  gradesTable: HTMLTableElement,
+): NodeListOf<HTMLTableSectionElement> {
+  return gradesTable.querySelectorAll('tbody:nth-child(even)')
+}
+
+function getPeriodNamesTables(
+  gradesTable: HTMLTableElement,
+): NodeListOf<HTMLTableSectionElement> {
+  return gradesTable.querySelectorAll('tbody:nth-child(odd)')
+}
+
 function getPeriodName(table: HTMLTableSectionElement): string {
   const text = table.textContent ?? ''
-  return text.trim().replace(/ - .*/g, '')
+  return text.replace(includeInAverageText, '').trim().replace(/ - .*/g, '')
 }
 
 function getGradesTable(): HTMLTableElement | null {
