@@ -182,12 +182,13 @@ function getGrades(table: HTMLTableSectionElement): number[] {
 function gradeCellToNumber(cell: HTMLTableCellElement): number {
   const text = cell.textContent ?? ''
   const numsOnly = text.replace(/[^\d,()]/g, '')
-  const normalized = numsOnly.replace(',', '.')
-  const grades = normalized.match(/\d+(.\d+)?/g) ?? []
+  const normalized = numsOnly.replace(/,/g, '.')
+  const grades = normalized.match(/\d+(\.\d+)?/g) ?? []
   const floats = []
   for (const grade of grades) {
     floats.push(parseFloat(grade))
   }
+  if (floats.length > 1) console.log(floats, text, normalized, grades)
   return calcAverage(floats)
 }
 
@@ -243,7 +244,8 @@ function getPeriodNamesTables(
 
 function getPeriodName(table: HTMLTableSectionElement): string {
   const text = table.textContent ?? ''
-  return text.replace(includeInAverageText, '').trim().replace(/ - .*/g, '')
+  const re = new RegExp(includeInAverageText, 'g')
+  return text.replace(re, '').trim().replace(/ - .*/g, '')
 }
 
 function getGradesTable(): HTMLTableElement | null {
