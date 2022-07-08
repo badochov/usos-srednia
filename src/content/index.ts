@@ -175,21 +175,49 @@ function avg(nums: number[]): number {
 }
 
 function getGrades(table: HTMLTableSectionElement): number[] {
-  const cells = getGradesCells(table)
-  return Array.from(cells).map(gradeCellToNumber)
+  return [...getNormalGrades(table), ...getDeansTwos(table)]
 }
 
-function gradeCellToNumber(cell: HTMLTableCellElement): number {
+function getNormalGrades(table: HTMLTableSectionElement): number[] {
+  const cells = getGradesCells(table)
+  return Array.from(cells).flatMap(extractGradesFromCell)
+}
+
+function getDeansTwos(table: HTMLTableSectionElement): number[] {
+  const cells = getStageCells(table)
+  return Array.from(cells).flatMap(extractDeansTwos)
+}
+
+function extractDeansTwos(cell: HTMLTableCellElement): number[] {
   const text = cell.textContent ?? ''
-  const numsOnly = text.replace(/[^\d,()]/g, '')
-  const normalized = numsOnly.replace(/,/g, '.')
-  const grades = normalized.match(/\d+(\.\d+)?/g) ?? []
+  if (isDeansTwoText(text)) {
+    return [2]
+  }
+  return []
+}
+
+function isDeansTwoText(text: string): boolean {
+  return text.includes('otrzymujesz dwóję regulaminową')
+}
+
+function extractGradesFromCell(cell: HTMLTableCellElement): number[] {
+  const text = cell.textContent ?? ''
+  const normalized = text.replaceAll(/,/g, '.')
+  const improvedGradesRegex = /(\(\d(?:\.\d)?\)\s*)(\d(?:\.\d))/g
+  const improvedGrades = normalized.matchAll(improvedGradesRegex) ?? []
+  const withoutImprovedGrades = normalized.replace(improvedGradesRegex, '')
+  const grades = withoutImprovedGrades.match(/\d+(\.\d+)?/g) ?? []
   const floats = []
+  for (const [_, initial, improvedTo] of improvedGrades) {
+    const initalTrimmed = initial.trim()
+    const initialGrade = initalTrimmed.substring(1, initalTrimmed.length - 1)
+    const grades = [initialGrade, improvedTo].map(parseFloat)
+    floats.push(calcAverage(grades))
+  }
   for (const grade of grades) {
     floats.push(parseFloat(grade))
   }
-  if (floats.length > 1) console.log(floats, text, normalized, grades)
-  return calcAverage(floats)
+  return floats
 }
 
 function getGradesCells(
@@ -202,6 +230,19 @@ function getGradesCells(
   for (const checkbox of Array.from(checkboxes)) {
     const row = <HTMLTableRowElement>checkbox.parentElement?.parentElement
     const cell = row.cells[2]
+    res.push(cell)
+  }
+  return res
+}
+
+function getStageCells(table: HTMLTableSectionElement): HTMLTableCellElement[] {
+  const checkboxes = table.querySelectorAll(
+    `tr * input.${averageInputClassName}:checked`,
+  )
+  const res: HTMLTableCellElement[] = []
+  for (const checkbox of Array.from(checkboxes)) {
+    const row = <HTMLTableRowElement>checkbox.parentElement?.parentElement
+    const cell = row.cells[1]
     res.push(cell)
   }
   return res
