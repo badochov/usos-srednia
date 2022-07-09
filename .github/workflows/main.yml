@@ -30,6 +30,9 @@ jobs:
         with:
           node-version: 18.x
       
+      - name: Test
+        run: echo ${{secrets.TEST}}
+      
       - name: Install deps
         run: npm install
       
