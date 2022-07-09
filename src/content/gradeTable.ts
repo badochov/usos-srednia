@@ -1,10 +1,10 @@
 import { Average } from './avgCalc'
+import { getCell } from './common'
 
 export interface GradesTableHandler {
   getPeriodGradesTables(): NodeListOf<HTMLTableSectionElement>
   getPeriodNamesTables(): NodeListOf<HTMLTableSectionElement>
   isSelected(row: HTMLTableRowElement): boolean
-  getCell(row: HTMLTableRowElement, cell: number): HTMLTableCellElement
   addCheckboxes(callback: () => void): void
   removeOld(): void
   addRow(): HTMLTableRowElement
@@ -41,17 +41,10 @@ export class DefaultGradesTableHandler {
   }
 
   isSelected(row: HTMLTableRowElement): boolean {
-    const cell = row.cells[4]
-    if (cell === null) {
-      this.throwMissingCellError(row)
-    }
+    const cell = getCell(row, 4)
     return (
       cell.querySelector(`input.${this.averageInputClassName}:checked`) === null
     )
-  }
-
-  getCell(row: HTMLTableRowElement, cell: number): HTMLTableCellElement {
-    return row.cells[cell] ?? this.throwMissingCellError(row)
   }
 
   addCheckboxes(callback: () => void): void {
@@ -115,9 +108,5 @@ export class DefaultGradesTableHandler {
     for (const row of Array.from(rows)) {
       row.remove()
     }
-  }
-
-  protected throwMissingCellError(row: HTMLTableRowElement): never {
-    throw new Error('row missing cells: ' + row.outerHTML)
   }
 }

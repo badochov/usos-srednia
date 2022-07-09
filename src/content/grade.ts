@@ -1,3 +1,4 @@
+import { cellToSubject, getCell, Program, Subject } from './common'
 import { GradesTableHandler } from './gradeTable'
 
 export interface GradePrimitive {
@@ -5,16 +6,6 @@ export interface GradePrimitive {
   initialGrade: number | null
   isDeansTwo: boolean
   name: string | null
-}
-
-export interface Subject {
-  name: string
-  code: string | null
-}
-
-export interface Program {
-  name: string | null
-  stage: string | null
 }
 
 export interface Grade {
@@ -48,23 +39,20 @@ export class DefaultGradeRowParser {
     if (tableHandler.isSelected(row)) {
       return null
     }
-    const subject = this.getSubject(row, tableHandler)
-    const program = this.getProgram(row, tableHandler)
-    const grades = this.getGradePrimitives(row, tableHandler)
+    const subject = this.getSubject(row)
+    const program = this.getProgram(row)
+    const grades = this.getGradePrimitives(row)
 
     return { grades, subject, program, period }
   }
 
-  protected getGradePrimitives(
-    row: HTMLTableRowElement,
-    tableHandler: GradesTableHandler,
-  ): GradePrimitive[] {
-    if (this.isDeansTwo(row, tableHandler)) {
+  protected getGradePrimitives(row: HTMLTableRowElement): GradePrimitive[] {
+    if (this.isDeansTwo(row)) {
       return [
         { finalGrade: null, isDeansTwo: true, initialGrade: null, name: null },
       ]
     }
-    const cell = tableHandler.getCell(row, 2)
+    const cell = getCell(row, 2)
     return Array.from(cell.children).map((d) =>
       this.getGradePromitivesFromDiv(d),
     )
@@ -106,21 +94,15 @@ export class DefaultGradeRowParser {
     return grade
   }
 
-  protected isDeansTwo(
-    row: HTMLTableRowElement,
-    tableHandler: GradesTableHandler,
-  ): boolean {
-    const cell = tableHandler.getCell(row, 1)
+  protected isDeansTwo(row: HTMLTableRowElement): boolean {
+    const cell = getCell(row, 1)
     const text = cell.textContent ?? ''
 
     return text.includes('otrzymujesz dwóję regulaminową')
   }
 
-  protected getProgram(
-    row: HTMLTableRowElement,
-    tableHandler: GradesTableHandler,
-  ): Program {
-    const cell = tableHandler.getCell(row, 1)
+  protected getProgram(row: HTMLTableRowElement): Program {
+    const cell = getCell(row, 1)
     if (cell.firstElementChild?.textContent?.trim() === '(niepodpięty)') {
       return { name: null, stage: null }
     }
@@ -136,19 +118,9 @@ export class DefaultGradeRowParser {
     return { name, stage }
   }
 
-  protected getSubject(
-    row: HTMLTableRowElement,
-    tableHandler: GradesTableHandler,
-  ): Subject {
-    const cell = tableHandler.getCell(row, 0)
-    const code = cell.lastElementChild?.textContent?.trim() || null
-    let name: string
-    if (cell.childElementCount == 1) {
-      name = cell.firstChild?.textContent?.trim() ?? ''
-    } else {
-      name = cell.firstElementChild?.textContent?.trim() ?? ''
-    }
-    return { name, code }
+  protected getSubject(row: HTMLTableRowElement): Subject {
+    const cell = getCell(row, 0)
+    return cellToSubject(cell)
   }
 }
 

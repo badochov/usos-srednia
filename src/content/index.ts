@@ -1,26 +1,30 @@
 import { AvgCounter, ClassicAverageCounter } from './avgCalc'
+import { Program } from './common'
 import {
   DefaultGradeRowParser,
   DefaultGradeTableParser,
   Grade,
   GradeRowParser,
   GradeTableParser,
-  Program,
 } from './grade'
 import { DefaultGradesTableHandler, GradesTableHandler } from './gradeTable'
+import { getLinkage, Linkage } from './linkage'
 
-function main(
+async function main(
   gradesTableHandler: GradesTableHandler,
   gradeTableParser: GradeTableParser,
   gradeRowParser: GradeRowParser,
   avgCounter: AvgCounter,
 ) {
+  const linkages = await getLinkage()
+
   gradesTableHandler.addCheckboxes(() =>
     handleAverages(
       gradesTableHandler,
       gradeTableParser,
       gradeRowParser,
       avgCounter,
+      linkages,
     ),
   )
   handleAverages(
@@ -28,6 +32,7 @@ function main(
     gradeTableParser,
     gradeRowParser,
     avgCounter,
+    linkages,
   )
 }
 
@@ -36,14 +41,15 @@ function handleAverages(
   gradeTableParser: GradeTableParser,
   gradeRowParser: GradeRowParser,
   avgCounter: AvgCounter,
+  linkages: Linkage[],
 ) {
   gradesTableHandler.removeOld()
 
   const grades = gradeTableParser.parseTable(gradesTableHandler, gradeRowParser)
 
   handleGlobalAverage(grades, gradesTableHandler, avgCounter)
-  handleProgramToGrade(grades, gradesTableHandler, avgCounter)
-  handleProgramStageToGrade(grades, gradesTableHandler, avgCounter)
+  handleProgramToGrade(grades, gradesTableHandler, avgCounter, linkages)
+  handleProgramStageToGrade(grades, gradesTableHandler, avgCounter, linkages)
   handleYearlyAverage(grades, gradesTableHandler, avgCounter)
 }
 
@@ -51,12 +57,22 @@ function handleProgramToGrade(
   grades: Grade[],
   gradesTableHandler: GradesTableHandler,
   avgCounter: AvgCounter,
+  linkages: Linkage[],
 ) {
-  const programs = getPrograms(grades)
+  const programs = getPrograms(linkages)
 
-  for (const program of programs) {
-    handleAllForProgram(program, grades, gradesTableHandler, avgCounter)
-    handleStageForProgram(program, grades, gradesTableHandler, avgCounter)
+  for (const pName of programs) {
+    const matchingLinkages = linkages.filter(
+      ({ program, includeInProgram }) =>
+        program.name === pName && includeInProgram,
+    )
+    const matchingCodes = matchingLinkages.map(({ subject: { code } }) => code)
+
+    const avg = avgCounter.getAverage(grades, ({ subject: { code } }) =>
+      matchingCodes.includes(code),
+    )
+    const row = gradesTableHandler.addRow()
+    gradesTableHandler.formatAverageRow(row, avg, `Średnia za ${pName}`)
   }
 }
 
@@ -64,12 +80,19 @@ function handleProgramStageToGrade(
   grades: Grade[],
   gradesTableHandler: GradesTableHandler,
   avgCounter: AvgCounter,
+  linkages: Linkage[],
 ) {
-  const programStages = getProgramStages(grades)
+  const programStages = getProgramStages(linkages)
 
   for (const pS of programStages) {
-    const avg = avgCounter.getAverage(grades, ({ program }) =>
-      programsEqual(pS, program),
+    const matchingLinkages = linkages.filter(
+      ({ program, includeInProgram, includeInStage }) =>
+        programsEqual(program, pS) && includeInProgram && includeInStage,
+    )
+    const matchingCodes = matchingLinkages.map(({ subject: { code } }) => code)
+
+    const avg = avgCounter.getAverage(grades, ({ subject: { code } }) =>
+      matchingCodes.includes(code),
     )
     const row = gradesTableHandler.addRow()
     gradesTableHandler.formatAverageRow(
@@ -82,38 +105,6 @@ function handleProgramStageToGrade(
 
 function programsEqual(program: Program, program2: Program) {
   return program.name === program2.name && program.stage === program2.stage
-}
-
-function handleAllForProgram(
-  program: string,
-  grades: Grade[],
-  gradesTableHandler: GradesTableHandler,
-  avgCounter: AvgCounter,
-) {
-  const avg = avgCounter.getAverage(
-    grades,
-    (grade) => grade.program.name === program,
-  )
-  const row = gradesTableHandler.addRow()
-  gradesTableHandler.formatAverageRow(row, avg, `Średnia za ${program}`)
-}
-
-function handleStageForProgram(
-  program: string,
-  grades: Grade[],
-  gradesTableHandler: GradesTableHandler,
-  avgCounter: AvgCounter,
-) {
-  const avg = avgCounter.getAverage(
-    grades,
-    (grade) => grade.program.name === program && grade.program.stage !== null,
-  )
-  const row = gradesTableHandler.addRow()
-  gradesTableHandler.formatAverageRow(
-    row,
-    avg,
-    `Średnia za podpięcia pod etap w ${program}`,
-  )
 }
 
 function handleYearlyAverage(
@@ -144,10 +135,11 @@ function getYears(grades: Grade[]): string[] {
   return Array.from(years)
 }
 
-function getPrograms(grades: Grade[]): string[] {
+function getPrograms(linkages: Linkage[]): string[] {
   const programs = new Set<string>()
-  for (const grade of grades) {
-    const name = grade.program.name
+  for (const {
+    program: { name },
+  } of linkages) {
     if (name !== null) {
       programs.add(name)
     }
@@ -155,9 +147,9 @@ function getPrograms(grades: Grade[]): string[] {
   return Array.from(programs)
 }
 
-function getProgramStages(grades: Grade[]): Program[] {
+function getProgramStages(linkages: Linkage[]): Program[] {
   const programs: Program[] = []
-  for (const { program } of grades) {
+  for (const { program } of linkages) {
     if (
       program.name !== null &&
       program.stage !== null &&
