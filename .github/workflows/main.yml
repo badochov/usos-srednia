@@ -2,9 +2,9 @@ name: Chrome Extension Publish
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
   workflow_dispatch:
 
 jobs:
@@ -13,25 +13,26 @@ jobs:
     environment: chrome-publish
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
-      
-      - name: Test
-        run: echo start && [[ $(echo ${{secrets.TEST}}) == "foobar" ]] && echo end
-      
+
       - name: Install deps
         run: npm install
-      
+
       - name: Build
         run: npm run release
-        
+
+      - name: Check if version has been updated
+        id: version_change
+        uses: EndBug/version-check@v1
+
       - name: Chrome Extension upload & publish
+        if: steps.version-version_change.outputs.changed == 'true'
         uses: Passiverecords/chrome-extension-upload-action@1.4.1
         with:
-          # Auth refresh token
           refresh-token: ${{ secrets.REFRESH_TOKEN }}
           app-id: lbbbenibppgfmakcjpdchgdkjfeipndb
           client-id: 697242455057-i7c4ej57piivmio3os5216g4sefg6cdp.apps.googleusercontent.com
