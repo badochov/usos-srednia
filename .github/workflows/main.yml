@@ -31,7 +31,7 @@ jobs:
           node-version: 18.x
       
       - name: Build
-        run: npm run publish
+        run: npm run release
       
       - name: Chrome Extension upload & publish
         uses: Passiverecords/chrome-extension-upload-action@1.4.1
