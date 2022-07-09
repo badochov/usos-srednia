@@ -8,9 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-    environment: chrome-publish
     steps:
       - uses: actions/checkout@v3
 
@@ -25,6 +24,11 @@ jobs:
       - name: Build
         run: npm run release
 
+  publish:
+    environment: chrome-publish
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Check if version has been updated
         id: version_change
         uses: EndBug/version-check@v1
