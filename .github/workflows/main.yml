@@ -36,5 +36,5 @@ jobs:
           app-id: lbbbenibppgfmakcjpdchgdkjfeipndb
           client-id: 697242455057-i7c4ej57piivmio3os5216g4sefg6cdp.apps.googleusercontent.com
           client-secret: ${{ secrets.CLIENT_SECRET }}
-          file-name: releases/usos-srednia-1.0.2.zip
+          file-name: releases/usos-srednia-1.0.3.zip
           publish: true
