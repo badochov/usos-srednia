@@ -30,6 +30,9 @@ jobs:
         with:
           node-version: 18.x
       
+      - name: Install deps
+        run: npm install
+      
       - name: Build
         run: npm run release
       
