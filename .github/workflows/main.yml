@@ -36,6 +36,5 @@ jobs:
           client-id: 697242455057-i7c4ej57piivmio3os5216g4sefg6cdp.apps.googleusercontent.com
           client-secret: ${{ secrets.CLIENT_SECRET }}
           file-name:
-            releases/usos-srednia-${{
-            steps.version_change.outputs.version_change }}.zip
+            releases/usos-srednia-${{steps.version_change.outputs.version }}.zip
           publish: true
