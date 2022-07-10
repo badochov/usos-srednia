@@ -8,7 +8,11 @@
       "matches": [
         "https://usosweb.uw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index",
         "https://usosweb.fuw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index",
-        "https://usosweb.mimuw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index"
+        "https://usosweb.mimuw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index",
+        "https://usosweb.chem.uw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index",
+        "https://usosweb.wne.uw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index",
+        "https://usosweb.wpia.uw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index",
+        "https://usosweb.wnpism.uw.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index"
       ]
     }
   ],
