@@ -1,6 +1,11 @@
 # USOS średnia
 Rozszerzenie do przeglądarki pozwalajacę na proste liczenie średniej w USOS.
 
+## Instalacje
+Rozszerzenie jest gotowe do pobrania dla
+- [Chrome](https://chrome.google.com/webstore/detail/lbbbenibppgfmakcjpdchgdkjfeipndb)
+- [Firefox](https://addons.mozilla.org/pl/firefox/addon/usos-%C5%9Brednia/)
+
 ## Budowanie
 Do zbudowania potrzebne są:
 - Node.js v18.5.0
