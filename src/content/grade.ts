@@ -11,7 +11,7 @@ export interface GradePrimitive {
 export interface Grade {
   grades: GradePrimitive[]
   subject: Subject
-  program: Program
+  programs: Program[]
   period: string
 }
 
@@ -40,10 +40,10 @@ export class DefaultGradeRowParser {
       return null
     }
     const subject = this.getSubject(row)
-    const program = this.getProgram(row)
+    const programs = this.getPrograms(row)
     const grades = this.getGradePrimitives(row)
 
-    return { grades, subject, program, period }
+    return { grades, subject, programs, period }
   }
 
   protected getGradePrimitives(row: HTMLTableRowElement): GradePrimitive[] {
@@ -101,21 +101,29 @@ export class DefaultGradeRowParser {
     return text.includes('otrzymujesz dwóję regulaminową')
   }
 
-  protected getProgram(row: HTMLTableRowElement): Program {
+  protected getPrograms(row: HTMLTableRowElement): Program[] {
     const cell = getCell(row, 1)
     if (cell.firstElementChild?.textContent?.trim() === '(niepodpięty)') {
-      return { name: null, stage: null }
+      return []
     }
-    const programSpanText =
-      cell.firstElementChild?.firstElementChild?.textContent?.trim() ?? ''
+    const programs: Program[] = []
 
-    const split = programSpanText.split(' ')
-    const name = split[0]
-    let stage = null
-    if (split.length === 2) {
-      stage = split[1].substring(1, split[1].length - 1)
+    for (const child of Array.from(cell.children)) {
+      const programSpanText = child.firstElementChild?.textContent?.trim() ?? ''
+
+      const split = programSpanText.split(' ')
+      const name = split[0]
+      let stage = null
+      if (split.length === 2) {
+        stage = split[1].substring(1, split[1].length - 1)
+      }
+      programs.push({
+        name,
+        stage,
+      })
     }
-    return { name, stage }
+
+    return programs
   }
 
   protected getSubject(row: HTMLTableRowElement): Subject {

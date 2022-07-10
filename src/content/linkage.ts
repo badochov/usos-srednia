@@ -28,9 +28,33 @@ function parseLinkage(row: HTMLTableRowElement): Linkage {
 
 function getLinkageRows(template: HTMLTemplateElement): HTMLTableRowElement[] {
   const tables = getLinkageTables(template)
-  return tables.flatMap((table) =>
-    Array.from(table.rows).filter((_, i) => i % 2 === 1),
-  )
+  return tables.flatMap(extractRowsFromTable)
+}
+
+function extractRowsFromTable(table: HTMLTableElement): HTMLTableRowElement[] {
+  const rows: HTMLTableRowElement[] = []
+  let previousSubjectCell: HTMLTableCellElement | null = null
+  for (const row of Array.from(table.rows)) {
+    if (row.cells.length === 8) {
+      if (row.firstElementChild?.nodeName === 'TH') {
+        // Filter out header row.
+        continue
+      }
+      previousSubjectCell = row.cells[1]
+      rows.push(row)
+    } else if (row.cells.length === 6) {
+      // Other linkage for same subject
+      const rowCopy = <HTMLTableRowElement>row.cloneNode(true)
+      rowCopy.insertCell(0)
+      const subjectCell = rowCopy.insertCell(1)
+      if (previousSubjectCell !== null) {
+        subjectCell.outerHTML = previousSubjectCell.outerHTML
+      }
+      rows.push(rowCopy)
+    }
+    // Filter out helper rows.
+  }
+  return rows
 }
 
 function getLinkageTables(template: HTMLTemplateElement): HTMLTableElement[] {
@@ -83,7 +107,6 @@ function parseIncludeIn(row: HTMLTableRowElement): [boolean, boolean] {
   const cell = getCell(row, 5)
   const text = cell.textContent?.trim() ?? '/'
   const [inProgram, inStage] = text.split('/')
-  console.log(text, inProgram, inStage)
 
   return [inProgram.trim() === 'TAK', inStage.trim() === 'TAK']
 }
