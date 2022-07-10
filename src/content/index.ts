@@ -69,8 +69,11 @@ function handleProgramToGrade(
     )
     const matchingCodes = matchingLinkages.map(({ subject: { code } }) => code)
 
-    const avg = avgCounter.getAverage(grades, ({ subject: { code } }) =>
-      matchingCodes.includes(code),
+    const avg = avgCounter.getAverage(
+      grades,
+      ({ subject: { code }, programs }) =>
+        matchingCodes.includes(code) &&
+        programs.some(({ name }) => name === pName),
     )
     const row = gradesTableHandler.addRow()
     gradesTableHandler.formatAverageRow(row, avg, `Średnia za ${pName}`)
@@ -92,8 +95,11 @@ function handleProgramStageToGrade(
     )
     const matchingCodes = matchingLinkages.map(({ subject: { code } }) => code)
 
-    const avg = avgCounter.getAverage(grades, ({ subject: { code } }) =>
-      matchingCodes.includes(code),
+    const avg = avgCounter.getAverage(
+      grades,
+      ({ subject: { code }, programs }) =>
+        matchingCodes.includes(code) &&
+        programs.some((program) => programsEqual(program, pS)),
     )
     const row = gradesTableHandler.addRow()
     gradesTableHandler.formatAverageRow(
