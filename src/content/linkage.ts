@@ -66,7 +66,7 @@ function getLinkageTables(template: HTMLTemplateElement): HTMLTableElement[] {
 
 async function getLinkageHTML(): Promise<string> {
   const response = await fetch(
-    'https://usosweb.mimuw.edu.pl/kontroler.php?_action=dla_stud/studia/podpiecia/lista',
+    '/kontroler.php?_action=dla_stud/studia/podpiecia/lista',
   )
   return response.text()
 }
