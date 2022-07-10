@@ -55,22 +55,19 @@ function handleProgramToGrade(
 
 function handleMimSpecific(
   grades: Grade[],
-  avgCounter: AvgCounter,
-  _: Linkage[],
+  _avgCounter: AvgCounter,
+  _linkers: Linkage[],
 ): AvgData[] {
   const res = new Array<AvgData[]>()
   res.push(handleMimErasmusAverage(grades))
-  res.push(handleAverageForMimCsMaster(grades, avgCounter))
-  res.push(handleAverageForMimMathMaster(grades, avgCounter))
+  res.push(handleAverageForMimCsMaster(grades))
+  res.push(handleAverageForMimMathMaster(grades))
 
   return res.flat()
 }
 
-function handleAverageForMimMathMaster(
-  grades: Grade[],
-  avgCounter: AvgCounter,
-) {
-  return handleAverageByCodes(
+function handleAverageForMimMathMaster(grades: Grade[]) {
+  return handleAverageForRecrutationByCodes(
     [
       '1000-111bAM1', // analiza matematyczna I.1
       '1000-112bAM2', // analiza matematyczna I.2
@@ -90,21 +87,17 @@ function handleAverageForMimMathMaster(
     ],
     'Średnia rekrutacyjna na S2-MAT (MIM UW)',
     grades,
-    avgCounter,
-    false,
-    true,
   )
 }
 
-function handleAverageForMimCsMaster(grades: Grade[], avgCounter: AvgCounter) {
-  return handleAverageByCodes(
+function handleAverageForMimCsMaster(grades: Grade[]) {
+  return handleAverageForRecrutationByCodes(
     [
       '1000-211bAM1', // analiza matematyczna I
       '1000-212bAM2', // analiza matematyczna II
       '1000-211bGAL', // geometria z algebrą liniową
       '1000-211bPM', // podstawy matematyki
-      '1000-211bWPF', // wstęp do programowania(podejście funkcyjne)
-      '1000-211bWPI', // wstęp do programowania
+      '1000-211bWP', // wstęp do programowania
       '1000-212bMD', // matematyka dyskretna
       '1000-212bPO', // programowanie obiektowe
       '1000-222bIPP', // indywidualny projekt programistyczny
@@ -124,28 +117,21 @@ function handleAverageForMimCsMaster(grades: Grade[], avgCounter: AvgCounter) {
     ],
     'Średnia rekrutacyjna na S2-INF (MIM UW)',
     grades,
-    avgCounter,
   )
 }
 
-function handleAverageByCodes(
+function handleAverageForRecrutationByCodes(
   codes: string[],
   label: string,
   grades: Grade[],
-  avgCounter: AvgCounter,
-  includeIfEmpty = false,
-  prefixIsSufficient = false,
 ): AvgData[] {
   const gradesToCount: Grade[][] = []
   let any = false
   for (const c of codes) {
-    const cGrades = grades.filter(({ subject: { code } }) => {
-      if (code === null) return false
-      if (prefixIsSufficient) {
-        return codes.some((c) => c.startsWith(code))
-      }
-      return codes.includes(code)
-    })
+    const cGrades = grades.filter(
+      ({ subject: { code } }) =>
+        code !== null && codes.some((c) => c.startsWith(code)),
+    )
     if (cGrades.length === 0) {
       gradesToCount.push([getDeansTwoForCode(c)])
     } else {
@@ -154,13 +140,31 @@ function handleAverageByCodes(
     }
   }
 
-  if (!includeIfEmpty && !any) {
+  if (!any) {
     return []
   }
 
-  const avg = avgCounter.getAverage(gradesToCount.flat())
+  const gradesFilter = (_: Grade) => true
+  const sameCodeGradeAction = (grades: Grade[]) => {
+    if (grades.length === 0) {
+      return []
+    }
+    const firstGrade = copyGrade(grades[0])
+    firstGrade.grades = grades.flatMap(({ grades }) => grades)
+
+    return [firstGrade]
+  }
+  const avg = new MaxAverageCounter().getAverage(
+    gradesToCount.flat(),
+    gradesFilter,
+    sameCodeGradeAction,
+  )
 
   return [{ avg, label }]
+}
+
+export function copyGrade(grade: Grade): Grade {
+  return JSON.parse(JSON.stringify(grade))
 }
 
 function getDeansTwoForCode(code: string): Grade {

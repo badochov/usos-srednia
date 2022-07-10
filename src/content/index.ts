@@ -1,5 +1,5 @@
 import { AvgCounter, MeanAverageCounter } from './avgCalc'
-import { AvgHandler, avgHandlers } from './avgHandlers'
+import { AvgHandler, avgHandlers, copyGrade } from './avgHandlers'
 import {
   DefaultGradeRowParser,
   DefaultGradeTableParser,
@@ -22,7 +22,7 @@ function handleAverages(
   const grades = gradeTableParser.parseTable(gradesTableHandler, gradeRowParser)
 
   for (const handler of avgHandlers) {
-    const results = handler(grades, avgCounter, linkages)
+    const results = handler(grades.map(copyGrade), avgCounter, linkages)
     for (const { avg, label, color } of results) {
       const row = gradesTableHandler.addRow()
       gradesTableHandler.formatAverageRow(row, avg, label, color)

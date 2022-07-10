@@ -9,7 +9,11 @@ export interface Average {
 export type GradeFilter = (grade: Grade) => boolean
 
 export interface AvgCounter {
-  getAverage(grades: Grade[], gradesFilter?: GradeFilter): Average
+  getAverage(
+    grades: Grade[],
+    gradesFilter?: GradeFilter,
+    sameCodeGradeAction?: (grades: Grade[]) => Grade[],
+  ): Average
 }
 
 class DefaultAverage {
@@ -36,9 +40,18 @@ class DefaultAverage {
 }
 
 export class MeanAverageCounter {
-  getAverage(grades: Grade[], gradesFilter?: GradeFilter): Average {
+  getAverage(
+    grades: Grade[],
+    gradesFilter?: GradeFilter,
+    sameCodeGradeAction?: (grades: Grade[]) => Grade[],
+  ): Average {
     if (gradesFilter !== undefined) {
       grades = grades.filter(gradesFilter)
+    }
+
+    if (sameCodeGradeAction !== undefined) {
+      const grouppedByCode = groupByCode(grades)
+      grades = grouppedByCode.flatMap((g) => sameCodeGradeAction(g))
     }
     const parsedGrades = grades.flatMap((g) => this.parseGrade(g))
 
@@ -64,11 +77,20 @@ export class MeanAverageCounter {
 }
 
 export class MaxAverageCounter {
-  getAverage(grades: Grade[], gradesFilter?: GradeFilter): Average {
+  getAverage(
+    grades: Grade[],
+    gradesFilter?: GradeFilter,
+    sameCodeGradeAction?: (grades: Grade[]) => Grade[],
+  ): Average {
     if (gradesFilter !== undefined) {
-      grades = grades.filter(gradesFilter)
+      grades = grades.filter((g) => gradesFilter(g))
+    }
+    if (sameCodeGradeAction !== undefined) {
+      const grouppedByCode = groupByCode(grades)
+      grades = grouppedByCode.flatMap((g) => sameCodeGradeAction(g))
     }
     const parsedGrades = grades.flatMap((g) => this.parseGrade(g))
+    console.log(parsedGrades)
 
     return new DefaultAverage(parsedGrades)
   }
@@ -89,6 +111,23 @@ export class MaxAverageCounter {
     }
     return [Math.max(...grades)]
   }
+}
+
+function groupByCode(grades: Grade[]): Grade[][] {
+  console.log(grades)
+  const map = new Map<string, Grade[]>()
+  for (const grade of grades) {
+    if (grade.subject.code !== null) {
+      console.log(JSON.parse(JSON.stringify(map)))
+      const prev = map.get(grade.subject.code) ?? []
+      prev.push(grade)
+      console.log(prev)
+      map.set(grade.subject.code, prev)
+    }
+  }
+  console.log(map)
+
+  return Array.from(map.values())
 }
 
 export function avg(nums: number[]): number {
