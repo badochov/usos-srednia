@@ -8,7 +8,12 @@ export interface GradesTableHandler {
   addCheckboxes(callback: () => void): void
   removeOld(): void
   addRow(): HTMLTableRowElement
-  formatAverageRow(row: HTMLTableRowElement, avg: Average, label: string): void
+  formatAverageRow(
+    row: HTMLTableRowElement,
+    avg: Average,
+    label: string,
+    color?: string,
+  ): void
   INCLUDE_IN_AVERAGE_TEXT: string
   gradesTable: HTMLTableElement
 }
@@ -78,6 +83,7 @@ export class DefaultGradesTableHandler {
     row: HTMLTableRowElement,
     avg: Average,
     label: string,
+    color?: string,
   ): void {
     const labelCell = row.insertCell()
     const avgCell = row.insertCell()
@@ -85,7 +91,8 @@ export class DefaultGradesTableHandler {
     avgCell.textContent = avg.toString()
 
     row.style.fontWeight = 'bold'
-    avgCell.style.backgroundColor = labelCell.style.backgroundColor = '#EDFFD3'
+    avgCell.style.backgroundColor = labelCell.style.backgroundColor =
+      color ?? '#EDFFD3'
     avgCell.style.textAlign = 'right'
 
     labelCell.colSpan = 2
