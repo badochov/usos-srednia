@@ -2,6 +2,7 @@ import { Grade, GradePrimitive } from './grade'
 
 export interface Average {
   get(): number
+  isNaN(): boolean
   toString(): string
 }
 
@@ -22,6 +23,10 @@ class DefaultAverage {
     return this.avg
   }
 
+  isNaN(): boolean {
+    return isNaN(this.avg)
+  }
+
   toString(): string {
     if (isNaN(this.avg)) {
       return '-'
@@ -30,7 +35,7 @@ class DefaultAverage {
   }
 }
 
-export class ClassicAverageCounter {
+export class MeanAverageCounter {
   getAverage(grades: Grade[], gradesFilter?: GradeFilter): Average {
     if (gradesFilter !== undefined) {
       grades = grades.filter(gradesFilter)
@@ -55,6 +60,34 @@ export class ClassicAverageCounter {
       return []
     }
     return [avg(grades)]
+  }
+}
+
+export class MaxAverageCounter {
+  getAverage(grades: Grade[], gradesFilter?: GradeFilter): Average {
+    if (gradesFilter !== undefined) {
+      grades = grades.filter(gradesFilter)
+    }
+    const parsedGrades = grades.flatMap((g) => this.parseGrade(g))
+
+    return new DefaultAverage(parsedGrades)
+  }
+
+  protected parseGrade(grade: Grade): number[] {
+    return grade.grades.flatMap(this.parseGradePrimitive)
+  }
+
+  protected parseGradePrimitive(grade: GradePrimitive): number[] {
+    if (grade.isDeansTwo) {
+      return [2]
+    }
+    const grades: number[] = <number[]>(
+      [grade.initialGrade, grade.finalGrade].filter((g) => g !== null)
+    )
+    if (grades.length === 0) {
+      return []
+    }
+    return [Math.max(...grades)]
   }
 }
 

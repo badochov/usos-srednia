@@ -1,4 +1,4 @@
-import { AvgCounter, ClassicAverageCounter } from './avgCalc'
+import { AvgCounter, MaxAverageCounter, MeanAverageCounter } from './avgCalc'
 import { Program } from './common'
 import {
   DefaultGradeRowParser,
@@ -51,6 +51,7 @@ function handleAverages(
   handleProgramToGrade(grades, gradesTableHandler, avgCounter, linkages)
   handleProgramStageToGrade(grades, gradesTableHandler, avgCounter, linkages)
   handleYearlyAverage(grades, gradesTableHandler, avgCounter)
+  handleMimErasmusAverage(grades, gradesTableHandler)
 }
 
 function handleProgramToGrade(
@@ -127,6 +128,29 @@ function handleYearlyAverage(
   }
 }
 
+function handleMimErasmusAverage(
+  grades: Grade[],
+  gradesTableHandler: GradesTableHandler,
+) {
+  const avgCounter = new MaxAverageCounter()
+
+  const avg = avgCounter.getAverage(
+    grades,
+    ({ subject: { code } }) => code?.startsWith('1000-') ?? false,
+  )
+
+  if (avg.isNaN()) {
+    return
+  }
+
+  const row = gradesTableHandler.addRow()
+  gradesTableHandler.formatAverageRow(
+    row,
+    avg,
+    `Średnia rankingowa na ERASMUS (MIM UW)`,
+  )
+}
+
 function getYears(grades: Grade[]): string[] {
   const years = new Set<string>()
   for (const grade of grades) {
@@ -189,5 +213,5 @@ main(
   new DefaultGradesTableHandler(),
   new DefaultGradeTableParser(),
   new DefaultGradeRowParser(),
-  new ClassicAverageCounter(),
+  new MeanAverageCounter(),
 )
