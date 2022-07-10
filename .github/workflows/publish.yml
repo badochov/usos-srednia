@@ -22,7 +22,7 @@ jobs:
         uses: EndBug/version-check@v1
 
       - name: Early exit if version didn't change
-        if: steps.version_change.outputs.changed == 'false'
+        if: steps.version_change.outputs.changed != 'true'
         run: exit 1
 
       - name: Install deps
@@ -58,7 +58,7 @@ jobs:
         uses: EndBug/version-check@v1
 
       - name: Early exit if version didn't change
-        if: steps.version_change.outputs.changed == 'false'
+        if: steps.version_change.outputs.changed != 'true'
         run: exit 1
 
       - name: Change manifest to V2
