@@ -90,7 +90,6 @@ export class MaxAverageCounter {
       grades = grouppedByCode.flatMap((g) => sameCodeGradeAction(g))
     }
     const parsedGrades = grades.flatMap((g) => this.parseGrade(g))
-    console.log(parsedGrades)
 
     return new DefaultAverage(parsedGrades)
   }
@@ -114,18 +113,14 @@ export class MaxAverageCounter {
 }
 
 function groupByCode(grades: Grade[]): Grade[][] {
-  console.log(grades)
   const map = new Map<string, Grade[]>()
   for (const grade of grades) {
     if (grade.subject.code !== null) {
-      console.log(JSON.parse(JSON.stringify(map)))
       const prev = map.get(grade.subject.code) ?? []
       prev.push(grade)
-      console.log(prev)
       map.set(grade.subject.code, prev)
     }
   }
-  console.log(map)
 
   return Array.from(map.values())
 }
