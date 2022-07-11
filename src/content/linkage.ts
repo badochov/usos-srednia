@@ -65,8 +65,9 @@ function getLinkageTables(template: HTMLTemplateElement): HTMLTableElement[] {
 }
 
 async function getLinkageHTML(): Promise<string> {
+  const origin = window.location.origin
   const response = await fetch(
-    '/kontroler.php?_action=dla_stud/studia/podpiecia/lista',
+    `${origin}/kontroler.php?_action=dla_stud/studia/podpiecia/lista`,
   )
   return response.text()
 }
