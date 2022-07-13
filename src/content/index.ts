@@ -30,7 +30,7 @@ function handleAverages(
   }
 }
 
-async function main(
+async function usosVersion6_7(
   gradesTableHandler: GradesTableHandler,
   gradeTableParser: GradeTableParser,
   gradeRowParser: GradeRowParser,
@@ -59,10 +59,38 @@ async function main(
   )
 }
 
-main(
-  new DefaultGradesTableHandler(),
-  new DefaultGradeTableParser(),
-  new DefaultGradeRowParser(),
-  new MeanAverageCounter(),
-  avgHandlers,
-)
+async function main() {
+  const version = getUsosVersion()
+  if (version === undefined) {
+    console.error("Couldn't determine USOSweb version")
+    return
+  }
+  const handler = getHandlerForUsosVersion(version)
+  if (handler === null) {
+    console.error(`No handler for USOSweb version ${version}`)
+    return
+  }
+  await handler()
+}
+
+function getUsosVersion(): string | undefined {
+  return document.body.textContent?.match(/(?<=USOSweb )\S+/)?.at(0)
+}
+
+function getHandlerForUsosVersion(
+  version: string,
+): (() => Promise<void>) | null {
+  if (version.startsWith('6.7')) {
+    return async () =>
+      usosVersion6_7(
+        new DefaultGradesTableHandler(),
+        new DefaultGradeTableParser(),
+        new DefaultGradeRowParser(),
+        new MeanAverageCounter(),
+        avgHandlers,
+      )
+  }
+  return null
+}
+
+main()
