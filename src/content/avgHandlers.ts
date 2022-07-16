@@ -129,8 +129,7 @@ function handleAverageForRecrutationByCodes(
   let any = false
   for (const c of codes) {
     const cGrades = grades.filter(
-      ({ subject: { code } }) =>
-        code !== null && codes.some((c) => c.startsWith(code)),
+      ({ subject: { code } }) => code !== null && code.startsWith(c),
     )
     if (cGrades.length === 0) {
       gradesToCount.push([getDeansTwoForCode(c)])
