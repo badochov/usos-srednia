@@ -4,7 +4,7 @@ import {
   GPA4AverageCounter,
   MaxAverageCounter,
 } from './avgCalc'
-import { Program } from './common'
+import { Program, programsEqual } from './common'
 import { Grade } from './grade'
 import { Linkage } from './linkage'
 
@@ -214,10 +214,6 @@ function handleProgramStageToGrade(
   return res
 }
 
-function programsEqual(program: Program, program2: Program) {
-  return program.name === program2.name && program.stage === program2.stage
-}
-
 function handleYearlyAverage(
   grades: Grade[],
   avgCounter: AvgCounter,
@@ -306,13 +302,27 @@ function handleGlobalAverage(
 }
 
 function gpa4(grades: Grade[], _: AvgCounter, linkages: Linkage[]): AvgData[] {
-  grades.forEach((g) => (g.ects = 1))
-  const avg = new GPA4AverageCounter().getAverage(grades)
-  return [
-    {
+  const programs = getPrograms(linkages)
+
+  const res = new Array<AvgData>()
+  for (const pName of programs) {
+    const matchingLinkages = linkages.filter(
+      ({ program, includeInProgram }) =>
+        program.name === pName && includeInProgram,
+    )
+    const matchingCodes = matchingLinkages.map(({ subject: { code } }) => code)
+
+    const avg = new GPA4AverageCounter().getAverage(
+      grades,
+      ({ subject: { code }, programs }) =>
+        matchingCodes.includes(code) &&
+        programs.some(({ name }) => name === pName),
+    )
+    res.push({
       avg,
-      label:
-        'GPA <a href="https://github.com/badochov/usos-srednia#wyliczanie-gpa">[Szczegóły]</a>',
-    },
-  ]
+      label: `GPA za ${pName} <a href="https://github.com/badochov/usos-srednia#wyliczanie-gpa">[Szczegóły]</a>`,
+    })
+  }
+
+  return res
 }

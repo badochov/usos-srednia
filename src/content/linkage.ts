@@ -1,4 +1,11 @@
-import { cellToSubject, getCell, Program, Subject } from './common'
+import {
+  cellToSubject,
+  fetchInternalHTML,
+  getCell,
+  getTemplate,
+  Program,
+  Subject,
+} from './common'
 
 export async function getLinkage(): Promise<Linkage[]> {
   const html = await getLinkageHTML()
@@ -65,17 +72,9 @@ function getLinkageTables(template: HTMLTemplateElement): HTMLTableElement[] {
 }
 
 async function getLinkageHTML(): Promise<string> {
-  const origin = window.location.origin
-  const response = await fetch(
-    `${origin}/kontroler.php?_action=dla_stud/studia/podpiecia/lista`,
+  return fetchInternalHTML(
+    'kontroler.php?_action=dla_stud/studia/podpiecia/lista',
   )
-  return response.text()
-}
-
-function getTemplate(html: string): HTMLTemplateElement {
-  const template = document.createElement('template')
-  template.innerHTML = html
-  return template
 }
 
 function parseSubject(row: HTMLTableRowElement): Subject {
