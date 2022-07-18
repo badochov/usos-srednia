@@ -37,5 +37,6 @@ Rozszerzenie można prosto rozszerzyć o własne średnie dodając własną funk
 ### Inne uwagi
 - GPA jest wyliczane albo w skali do `4.0` albo do `4.3`, to rozszerzenie wyliczaja je w skali do `4.0`.
 - W GPA uwzględniane są wszystkie oceny znajdujące się na transkrypcie ocen.
-- Obecnie jeżeli przedmiot miał inną liczbę ECTSów przy róznych podejściach do niego, liczba ECTSów za przedmiot jest niederministycznie wybrana z tej dwójki. 
+    - Ograniczeniem są tutaj przedmioty znajdujące się na transkrypcie a niepodpięte pod program np. zewnętrzny egzamin z języka angielskiego.
+- Obecnie jeżeli przedmiot miał inną liczbę ECTSów przy róznych podejściach do niego, liczba ECTSów za przedmiot jest niederministycznie wybrana z możliwych za podejścia.
 
