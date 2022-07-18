@@ -1,4 +1,9 @@
-import { Average, AvgCounter, MaxAverageCounter } from './avgCalc'
+import {
+  Average,
+  AvgCounter,
+  GPA4AverageCounter,
+  MaxAverageCounter,
+} from './avgCalc'
 import { Program } from './common'
 import { Grade } from './grade'
 import { Linkage } from './linkage'
@@ -22,6 +27,7 @@ export const avgHandlers = new Array<AvgHandler>(
   handleProgramStageToGrade,
   handleYearlyAverage,
   handleMimSpecific,
+  gpa4,
 )
 
 // DEFAULT HANDLERS
@@ -297,4 +303,16 @@ function handleGlobalAverage(
 ): AvgData[] {
   const avg = avgCounter.getAverage(grades)
   return [{ avg, label: 'Średnia' }]
+}
+
+function gpa4(grades: Grade[], _: AvgCounter, linkages: Linkage[]): AvgData[] {
+  grades.forEach((g) => (g.ects = 1))
+  const avg = new GPA4AverageCounter().getAverage(grades)
+  return [
+    {
+      avg,
+      label:
+        'GPA <a href="https://github.com/badochov/usos-srednia#wyliczanie-gpa">[Szczegóły]</a>',
+    },
+  ]
 }

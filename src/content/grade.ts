@@ -13,6 +13,7 @@ export interface Grade {
   subject: Subject
   programs: Program[]
   period: string
+  ects?: number
 }
 
 export interface GradeRowParser {
