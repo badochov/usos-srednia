@@ -87,7 +87,7 @@ export class DefaultGradesTableHandler {
   ): void {
     const labelCell = row.insertCell()
     const avgCell = row.insertCell()
-    labelCell.textContent = label
+    labelCell.innerHTML = label
     avgCell.textContent = avg.toString()
 
     row.style.fontWeight = 'bold'

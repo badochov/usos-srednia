@@ -1,5 +1,6 @@
 import { AvgCounter, MeanAverageCounter } from './avgCalc'
 import { AvgHandler, avgHandlers, copyGrade } from './avgHandlers'
+import { addECTSInfo, ECTSForSubject, getECTSInfo } from './ects'
 import {
   DefaultGradeRowParser,
   DefaultGradeTableParser,
@@ -16,13 +17,15 @@ function handleAverages(
   avgCounter: AvgCounter,
   linkages: Linkage[],
   avgHandlers: AvgHandler[],
+  ectsInfo: ECTSForSubject[],
 ) {
   gradesTableHandler.removeOld()
 
   const grades = gradeTableParser.parseTable(gradesTableHandler, gradeRowParser)
+  const withEcts = addECTSInfo(grades, ectsInfo)
 
   for (const handler of avgHandlers) {
-    const results = handler(grades.map(copyGrade), avgCounter, linkages)
+    const results = handler(withEcts.map(copyGrade), avgCounter, linkages)
     for (const { avg, label, color } of results) {
       const row = gradesTableHandler.addRow()
       gradesTableHandler.formatAverageRow(row, avg, label, color)
@@ -38,6 +41,7 @@ async function usosVersion6_7(
   avgHandlers: AvgHandler[],
 ) {
   const linkages = await getLinkage()
+  const ectsInfo = await getECTSInfo()
 
   gradesTableHandler.addCheckboxes(() =>
     handleAverages(
@@ -47,6 +51,7 @@ async function usosVersion6_7(
       avgCounter,
       linkages,
       avgHandlers,
+      ectsInfo,
     ),
   )
   handleAverages(
@@ -56,6 +61,7 @@ async function usosVersion6_7(
     avgCounter,
     linkages,
     avgHandlers,
+    ectsInfo,
   )
 }
 
