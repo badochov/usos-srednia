@@ -1,34 +1,18 @@
 import { Average } from '../avgCalc'
-import { getCell } from './common'
-
-export interface GradesTableHandler {
-  getPeriodGradesTables(): NodeListOf<HTMLTableSectionElement>
-  getPeriodNamesTables(): NodeListOf<HTMLTableSectionElement>
-  isSelected(row: HTMLTableRowElement): boolean
-  addCheckboxes(callback: () => void): void
-  removeOld(): void
-  addRow(): HTMLTableRowElement
-  formatAverageRow(
-    row: HTMLTableRowElement,
-    avg: Average,
-    label: string,
-    color?: string,
-  ): void
-  INCLUDE_IN_AVERAGE_TEXT: string
-}
+import { getCell } from '../utils'
 
 export class DefaultGradesTableHandler {
-  private averageRowClassName = 'average-row'
-  private averageTbodyClassName = 'average-tbody'
-  private averageInputClassName = 'include-in-average-checkbox'
+  protected averageRowClassName = 'average-row'
+  protected averageTbodyClassName = 'average-tbody'
+  protected averageInputClassName = 'include-in-average-checkbox'
   INCLUDE_IN_AVERAGE_TEXT = 'W średniej'
-  gradesTable: HTMLTableElement
+  gradesTable: HTMLElement
 
   constructor() {
     this.gradesTable = this.getGradesTable()
   }
 
-  protected getGradesTable(): HTMLTableElement {
+  protected getGradesTable(): HTMLElement {
     const table = document.querySelector('#layout-c22a > div > table.grey')
     if (table === null) {
       throw new Error('Grades table not found')
@@ -40,7 +24,7 @@ export class DefaultGradesTableHandler {
     return this.gradesTable.querySelectorAll('tbody:nth-child(even)')
   }
 
-  getPeriodNamesTables(): NodeListOf<HTMLTableSectionElement> {
+  getPeriodNames(): NodeListOf<HTMLElement> {
     return this.gradesTable.querySelectorAll('tbody:nth-child(odd)')
   }
 
@@ -64,16 +48,6 @@ export class DefaultGradesTableHandler {
         checkbox.checked = true
         checkbox.onclick = () => callback()
         checkbox.classList.add(this.averageInputClassName)
-      }
-    }
-
-    const labelTables = this.getPeriodNamesTables()
-    for (const table of Array.from(labelTables)) {
-      for (const row of Array.from(table.rows)) {
-        const cell = row.insertCell()
-        const span = document.createElement('span')
-        cell.appendChild(span)
-        span.textContent = this.INCLUDE_IN_AVERAGE_TEXT
       }
     }
   }

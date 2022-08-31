@@ -1,21 +1,13 @@
-import { Grade, Program, Subject, GradePrimitive } from '../types'
-import { cellToSubject, getCell } from './common'
-import { GradesTableHandler } from './gradeTable'
-
-export interface GradeRowParser {
-  parseRow(
-    row: HTMLTableRowElement,
-    period: string,
-    tableHandler: GradesTableHandler,
-  ): Grade | null
-}
-
-export interface GradeTableParser {
-  parseTable(
-    tableHandler: GradesTableHandler,
-    gradeRowParser: GradeRowParser,
-  ): Grade[]
-}
+import {
+  Grade,
+  Program,
+  Subject,
+  GradePrimitive,
+  GradeRowParser,
+} from '../types'
+import { getCell } from '../utils'
+import { cellToSubject } from './common'
+import { GradesTableHandler } from '../types'
 
 export class DefaultGradeRowParser {
   parseRow(
@@ -140,7 +132,7 @@ export class DefaultGradeTableParser {
   protected getPeriodTables(
     tableHandler: GradesTableHandler,
   ): Map<string, HTMLTableSectionElement> {
-    const periodNamesTables = tableHandler.getPeriodNamesTables()
+    const periodNamesTables = tableHandler.getPeriodNames()
     const names = Array.from(periodNamesTables).map((t) =>
       this.getPeriodName(t, tableHandler),
     )
@@ -153,7 +145,7 @@ export class DefaultGradeTableParser {
   }
 
   protected getPeriodName(
-    table: HTMLTableSectionElement,
+    table: HTMLElement,
     tableHandler: GradesTableHandler,
   ): string {
     const text = table.textContent ?? ''

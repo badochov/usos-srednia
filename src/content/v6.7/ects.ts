@@ -1,6 +1,6 @@
-import { cellToSubject, getCell, getTemplate } from './common'
+import { cellToSubject } from './common'
 import { ECTSForSubject, Subject } from '../types'
-import { fetchInternalHTML } from '../utils'
+import { fetchInternalHTML, getCell, getTemplate } from '../utils'
 
 export async function getECTSInfo(): Promise<ECTSForSubject[]> {
   const html = await fetchInternalHTML(

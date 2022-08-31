@@ -1,15 +1,17 @@
 import { AvgCounter, MeanAverageCounter } from '../avgCalc'
 import { AvgHandler, avgHandlers } from '../avgHandlers'
-import { ECTSForSubject, Handler, Linkage } from '../types'
+import {
+  ECTSForSubject,
+  GradeRowParser,
+  GradesTableHandler,
+  GradeTableParser,
+  Handler,
+  Linkage,
+} from '../types'
 import { addECTSInfo, copyGrade } from '../utils'
 import { getECTSInfo } from './ects'
-import {
-  DefaultGradeRowParser,
-  DefaultGradeTableParser,
-  GradeRowParser,
-  GradeTableParser,
-} from './gradeParser'
-import { DefaultGradesTableHandler, GradesTableHandler } from './gradeTable'
+import { DefaultGradeRowParser, DefaultGradeTableParser } from './gradeParser'
+import { DefaultGradesTableHandler } from './gradeTable'
 import { getLinkage } from './linkage'
 
 export class Usos6_7Handler implements Handler {
@@ -27,7 +29,7 @@ export class Usos6_7Handler implements Handler {
     )
   }
 
-  async _handle(
+  protected async _handle(
     gradesTableHandler: GradesTableHandler,
     gradeTableParser: GradeTableParser,
     gradeRowParser: GradeRowParser,

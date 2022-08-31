@@ -1,3 +1,5 @@
+import { Average } from './avgCalc'
+
 export interface Subject {
   name: string
   code: string | null
@@ -39,4 +41,35 @@ export interface Linkage {
 export interface Handler {
   handlesVersion(version: string): boolean
   handle(): Promise<void>
+}
+
+export interface GradeRowParser {
+  parseRow(
+    row: HTMLTableRowElement,
+    period: string,
+    tableHandler: GradesTableHandler,
+  ): Grade | null
+}
+
+export interface GradeTableParser {
+  parseTable(
+    tableHandler: GradesTableHandler,
+    gradeRowParser: GradeRowParser,
+  ): Grade[]
+}
+
+export interface GradesTableHandler {
+  getPeriodGradesTables(): NodeListOf<HTMLTableSectionElement>
+  getPeriodNames(): NodeListOf<HTMLElement>
+  isSelected(row: HTMLTableRowElement): boolean
+  addCheckboxes(callback: () => void): void
+  removeOld(): void
+  addRow(): HTMLTableRowElement
+  formatAverageRow(
+    row: HTMLTableRowElement,
+    avg: Average,
+    label: string,
+    color?: string,
+  ): void
+  INCLUDE_IN_AVERAGE_TEXT: string
 }

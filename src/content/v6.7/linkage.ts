@@ -1,6 +1,6 @@
 import { Linkage, Program, Subject } from '../types'
-import { fetchInternalHTML } from '../utils'
-import { cellToSubject, getCell, getTemplate } from './common'
+import { fetchInternalHTML, getCell, getTemplate } from '../utils'
+import { cellToSubject } from './common'
 
 export async function getLinkage(): Promise<Linkage[]> {
   const html = await getLinkageHTML()
