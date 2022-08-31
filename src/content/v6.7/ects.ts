@@ -1,18 +1,6 @@
-import { copyGrade } from '../avgHandlers'
 import { cellToSubject, getCell, getTemplate } from './common'
-import { ECTSForSubject, Grade, Subject } from '../types'
-import { fetchInternalHTML, subjectsEqual } from '../utils'
-
-export function addECTSInfo(
-  grades: Grade[],
-  ectsInfo: ECTSForSubject[],
-): Grade[] {
-  return grades.map(copyGrade).map((grade) => {
-    const info = ectsInfo.find((i) => subjectsEqual(i.subject, grade.subject))
-    grade.ects = info?.ects
-    return grade
-  })
-}
+import { ECTSForSubject, Subject } from '../types'
+import { fetchInternalHTML } from '../utils'
 
 export async function getECTSInfo(): Promise<ECTSForSubject[]> {
   const html = await fetchInternalHTML(

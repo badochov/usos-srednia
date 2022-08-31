@@ -5,7 +5,7 @@ import {
   MaxAverageCounter,
 } from './avgCalc'
 import { Grade, Linkage, Program } from './types'
-import { programsEqual } from './utils'
+import { copyGrade, programsEqual } from './utils'
 
 export interface AvgData {
   label: string
@@ -165,10 +165,6 @@ function handleAverageForRecrutationByCodes(
   )
 
   return [{ avg, label }]
-}
-
-export function copyGrade(grade: Grade): Grade {
-  return JSON.parse(JSON.stringify(grade))
 }
 
 function getDeansTwoForCode(code: string): Grade {

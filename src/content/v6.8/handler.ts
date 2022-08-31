@@ -12,9 +12,9 @@ import {
 import { DefaultGradesTableHandler, GradesTableHandler } from './gradeTable'
 import { getLinkage } from './linkage'
 
-export class Usos6_7Handler implements Handler {
+export class Usos6_8Handler implements Handler {
   handlesVersion(version: string): boolean {
-    return version.startsWith('6.7')
+    return version.startsWith('6.8')
   }
 
   async handle(): Promise<void> {

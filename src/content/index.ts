@@ -1,7 +1,8 @@
 import { Handler } from './types'
 import { Usos6_7Handler } from './v6.7/handler'
+import { Usos6_8Handler } from './v6.8/handler'
 
-const handlers: Handler[] = [new Usos6_7Handler()]
+const handlers: Handler[] = [new Usos6_7Handler(), new Usos6_8Handler()]
 
 async function main() {
   const version = getUsosVersion()

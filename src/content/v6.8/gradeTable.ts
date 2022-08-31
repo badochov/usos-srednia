@@ -22,26 +22,28 @@ export class DefaultGradesTableHandler {
   private averageTbodyClassName = 'average-tbody'
   private averageInputClassName = 'include-in-average-checkbox'
   INCLUDE_IN_AVERAGE_TEXT = 'W średniej'
-  gradesTable: HTMLTableElement
+  gradesTable: HTMLElement
+
+  private averagesTable: HTMLTableElement | null = null
 
   constructor() {
     this.gradesTable = this.getGradesTable()
   }
 
-  protected getGradesTable(): HTMLTableElement {
-    const table = document.querySelector('#layout-c22a > div > table.grey')
+  protected getGradesTable(): HTMLElement {
+    const table = document.getElementById('oceny')
     if (table === null) {
       throw new Error('Grades table not found')
     }
-    return <HTMLTableElement>table
+    return table
   }
 
   getPeriodGradesTables(): NodeListOf<HTMLTableSectionElement> {
-    return this.gradesTable.querySelectorAll('tbody:nth-child(even)')
+    return this.gradesTable.querySelectorAll('tbody')
   }
 
   getPeriodNamesTables(): NodeListOf<HTMLTableSectionElement> {
-    return this.gradesTable.querySelectorAll('tbody:nth-child(odd)')
+    return this.gradesTable.querySelectorAll('div.ec-header')
   }
 
   isSelected(row: HTMLTableRowElement): boolean {
@@ -64,16 +66,6 @@ export class DefaultGradesTableHandler {
         checkbox.checked = true
         checkbox.onclick = () => callback()
         checkbox.classList.add(this.averageInputClassName)
-      }
-    }
-
-    const labelTables = this.getPeriodNamesTables()
-    for (const table of Array.from(labelTables)) {
-      for (const row of Array.from(table.rows)) {
-        const cell = row.insertCell()
-        const span = document.createElement('span')
-        cell.appendChild(span)
-        span.textContent = this.INCLUDE_IN_AVERAGE_TEXT
       }
     }
   }
@@ -99,11 +91,22 @@ export class DefaultGradesTableHandler {
     row.classList.add(this.averageRowClassName)
   }
 
+  private ensureAveragesTableExists() {
+    if (this.averagesTable !== null) {
+      return
+    }
+    this.averagesTable = document.createElement('table')
+    this.averagesTable.classList.add('fullwidth', 'grey')
+    this.gradesTable.appendChild(this.averagesTable)
+  }
+
   addRow(): HTMLTableRowElement {
+    this.ensureAveragesTableExists()
+
     const tbody = document.createElement('tbody')
     tbody.classList.add(this.averageTbodyClassName)
     const row = tbody.insertRow()
-    this.gradesTable.appendChild(tbody)
+    this.averagesTable?.appendChild(tbody)
     return row
   }
 
