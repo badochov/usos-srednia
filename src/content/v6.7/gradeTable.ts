@@ -1,4 +1,4 @@
-import { Average } from './avgCalc'
+import { Average } from '../avgCalc'
 import { getCell } from './common'
 
 export interface GradesTableHandler {

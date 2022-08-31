@@ -1,19 +1,7 @@
-import { copyGrade } from './avgHandlers'
-import {
-  cellToSubject,
-  fetchInternalHTML,
-  getCell,
-  getTemplate,
-  Subject,
-  subjectsEqual,
-} from './common'
-import { Grade } from './grade'
-
-export interface ECTSForSubject {
-  subject: Subject
-  ects: number
-  cycle: string
-}
+import { copyGrade } from '../avgHandlers'
+import { cellToSubject, getCell, getTemplate } from './common'
+import { ECTSForSubject, Grade, Subject } from '../types'
+import { fetchInternalHTML, subjectsEqual } from '../utils'
 
 export function addECTSInfo(
   grades: Grade[],
@@ -71,6 +59,7 @@ function parseSubject(row: HTMLTableRowElement): Subject {
   const subjectCell = getCell(row, 0)
   return cellToSubject(subjectCell)
 }
+
 function parseECTS(row: HTMLTableRowElement): number {
   const text = getCell(row, 2).textContent
   if (text === null) {

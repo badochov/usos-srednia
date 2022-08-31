@@ -1,4 +1,4 @@
-import { Grade, GradePrimitive } from './grade'
+import { Grade, GradePrimitive } from './types'
 
 export interface Average {
   get(): number

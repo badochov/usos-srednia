@@ -1,20 +1,6 @@
-import { cellToSubject, getCell, Program, Subject } from './common'
+import { Grade, Program, Subject, GradePrimitive } from '../types'
+import { cellToSubject, getCell } from './common'
 import { GradesTableHandler } from './gradeTable'
-
-export interface GradePrimitive {
-  finalGrade: number | null
-  initialGrade: number | null
-  isDeansTwo: boolean
-  name: string | null
-}
-
-export interface Grade {
-  grades: GradePrimitive[]
-  subject: Subject
-  programs: Program[]
-  period: string
-  ects?: number
-}
 
 export interface GradeRowParser {
   parseRow(

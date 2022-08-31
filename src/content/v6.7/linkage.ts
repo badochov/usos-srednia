@@ -1,24 +1,12 @@
-import {
-  cellToSubject,
-  fetchInternalHTML,
-  getCell,
-  getTemplate,
-  Program,
-  Subject,
-} from './common'
+import { Linkage, Program, Subject } from '../types'
+import { fetchInternalHTML } from '../utils'
+import { cellToSubject, getCell, getTemplate } from './common'
 
 export async function getLinkage(): Promise<Linkage[]> {
   const html = await getLinkageHTML()
   const template = getTemplate(html)
   const rows = getLinkageRows(template)
   return parseLinkages(rows)
-}
-
-export interface Linkage {
-  subject: Subject
-  program: Program
-  includeInProgram: boolean
-  includeInStage: boolean
 }
 
 function parseLinkages(rows: HTMLTableRowElement[]): Linkage[] {

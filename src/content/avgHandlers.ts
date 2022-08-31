@@ -4,9 +4,8 @@ import {
   GPA4AverageCounter,
   MaxAverageCounter,
 } from './avgCalc'
-import { Program, programsEqual } from './common'
-import { Grade } from './grade'
-import { Linkage } from './linkage'
+import { Grade, Linkage, Program } from './types'
+import { programsEqual } from './utils'
 
 export interface AvgData {
   label: string
