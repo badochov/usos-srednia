@@ -40,3 +40,9 @@ Rozszerzenie można prosto rozszerzyć o własne średnie dodając własną funk
     - Ograniczeniem są tutaj przedmioty znajdujące się na transkrypcie a niepodpięte pod program np. zewnętrzny egzamin z języka angielskiego.
 - Obecnie jeżeli przedmiot miał inną liczbę ECTSów przy róznych podejściach do niego, liczba ECTSów za przedmiot jest niederministycznie wybrana z możliwych za podejścia.
 
+## MIMUW
+### Dodatkowe średnie
+- [Średnia rekrutacyjna na magisterkę z Matematyki](https://www.mimuw.edu.pl/sites/default/files/lista_srednia_2stopien-mat.pdf)
+- [Średnia rekrutacyjna na magisterkę z Informatyki](https://www.mimuw.edu.pl/sites/default/files/lista_srednia_2stopien-inf.pdf)
+- [Średnia rankingowa na wyjazd ERASMUS](https://www.mimuw.edu.pl/~azator/Erasmus-info-2023-24.pdf)
+
