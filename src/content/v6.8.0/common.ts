@@ -8,6 +8,7 @@ export function cellToSubject(cell: HTMLTableCellElement): Subject {
     const split = txt.split(' ')
     name = split[0]
     if (split.length === 2) {
+      // FIXME I'm preetty sure it's a bug but I don't have any way of testing it.
       code = split[0].split(']')[0]
     }
   } else {

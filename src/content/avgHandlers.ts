@@ -58,11 +58,7 @@ function handleProgramToGrade(
   return res
 }
 
-function handleMimSpecific(
-  grades: Grade[],
-  _avgCounter: AvgCounter,
-  _linkers: Linkage[],
-): AvgData[] {
+function handleMimSpecific(grades: Grade[]): AvgData[] {
   const res = new Array<AvgData[]>()
   res.push(handleMimErasmusAverage(grades))
   res.push(handleAverageForMimCsMaster(grades))
@@ -148,7 +144,7 @@ function handleAverageForRecrutationByCodes(
     return []
   }
 
-  const gradesFilter = (_: Grade) => true
+  const gradesFilter = () => true
   const sameCodeGradeAction = (grades: Grade[]) => {
     if (grades.length === 0) {
       return []
@@ -212,7 +208,6 @@ function handleProgramStageToGrade(
 function handleYearlyAverage(
   grades: Grade[],
   avgCounter: AvgCounter,
-  _: Linkage[],
 ): AvgData[] {
   const years = getYears(grades)
 
@@ -290,7 +285,6 @@ function getYear(periodName: string): string {
 function handleGlobalAverage(
   grades: Grade[],
   avgCounter: AvgCounter,
-  _: Linkage[],
 ): AvgData[] {
   const avg = avgCounter.getAverage(grades)
   return [{ avg, label: 'Średnia' }]

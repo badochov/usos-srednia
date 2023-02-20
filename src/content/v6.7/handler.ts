@@ -12,7 +12,7 @@ import { addECTSInfo, copyGrade } from '../utils'
 import { getECTSInfo } from './ects'
 import { DefaultGradeRowParser, DefaultGradeTableParser } from './gradeParser'
 import { DefaultGradesTableHandler } from './gradeTable'
-import { getLinkage } from './linkage'
+import { LinkageGetter } from './linkage'
 
 export class Usos6_7Handler implements Handler {
   handlesVersion(version: string): boolean {
@@ -29,6 +29,10 @@ export class Usos6_7Handler implements Handler {
     )
   }
 
+  protected async getLinkage(): Promise<Linkage[]> {
+    return new LinkageGetter().getLinkage()
+  }
+
   protected async _handle(
     gradesTableHandler: GradesTableHandler,
     gradeTableParser: GradeTableParser,
@@ -36,10 +40,10 @@ export class Usos6_7Handler implements Handler {
     avgCounter: AvgCounter,
     avgHandlers: AvgHandler[],
   ): Promise<void> {
-    const linkages = await getLinkage()
+    const linkages = await this.getLinkage()
     const ectsInfo = await getECTSInfo()
 
-    gradesTableHandler.addCheckboxes(() =>
+    const averagesHandler = () =>
       this.handleAverages(
         gradesTableHandler,
         gradeTableParser,
@@ -48,17 +52,10 @@ export class Usos6_7Handler implements Handler {
         linkages,
         avgHandlers,
         ectsInfo,
-      ),
-    )
-    this.handleAverages(
-      gradesTableHandler,
-      gradeTableParser,
-      gradeRowParser,
-      avgCounter,
-      linkages,
-      avgHandlers,
-      ectsInfo,
-    )
+      )
+
+    gradesTableHandler.addCheckboxes(averagesHandler)
+    averagesHandler()
   }
 
   private handleAverages(
