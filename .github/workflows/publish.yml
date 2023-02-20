@@ -6,47 +6,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  has-changed:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version_change.outputs.version }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Use Node.js 19.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 19.x
-
-      - name: Check if version has been updated
-        id: version_change
-        uses: EndBug/version-check@v2
-
-      - name: Early exit if version didn't change
-        if: steps.version_change.outputs.changed != 'true'
-        run: exit 1
-
   create-github-release-draft:
     runs-on: ubuntu-latest
-    needs: has-changed
-    outputs:
-      id: ${{ steps.create_release.outputs.id }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
-      - name: Create Draft Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+      - uses: google-github-actions/release-please-action@v3
+        id: release
         with:
-          tag_name: ${{ needs.has-changed.outputs.version }}
-          release_name: ${{ needs.has-changed.outputs.version }}
-          draft: true
-          prerelease: false
+          release-type: node
+          package-name: usos-srednia
+      - run: ${{ steps.release.outputs.upload_url }}
+      - run: echo "A release was created.
+        if: ${{ steps.release.outputs.releases_created }}
 
   chrome-publish:
     runs-on: ubuntu-latest
-    needs: ['has-changed', 'create-github-release-draft']
+    needs: ['create-github-release-draft']
     environment: chrome-publish
     steps:
       - uses: actions/checkout@v3
@@ -70,25 +44,25 @@ jobs:
           client-id: 697242455057-i7c4ej57piivmio3os5216g4sefg6cdp.apps.googleusercontent.com
           client-secret: ${{ secrets.CLIENT_SECRET }}
           file-name:
-            releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
+            releases/usos-srednia-${{ needs.create-github-release-draft.outputs.tag }}.zip
           publish: true
 
       - name: Upload to github releases
         uses: actions/upload-release-asset@v1.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url:
-            ${{ needs.create-github-release-draft.outputs.upload_url  }}
+            ${{ needs.create-github-release-draft.outputs.upload_url }}
           asset_path:
-            releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
+            releases/usos-srednia-${{ needs.create-github-release-draft.outputs.tag }}.zip
           asset_name:
-            usos-srednia-chrome-${{ needs.has-changed.outputs.version  }}.zip
+            usos-srednia-chrome-${{ needs.create-github-release-draft.outputs.tag }}.zip
           asset_content_type: application/zip
 
   firefox-publish:
     runs-on: ubuntu-latest
-    needs: ['has-changed', 'create-github-release-draft']
+    needs: ['create-github-release-draft']
     environment: firefox-publish
     steps:
       - uses: actions/checkout@v3
@@ -115,7 +89,7 @@ jobs:
         with:
           uuid: '{7738ac86-b5b2-4372-bc2b-1c371631bd73}'
           xpi:
-            releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
+            releases/usos-srednia-${{ needs.create-github-release-draft.outputs.tag }}.zip
           manifest: dist/manifest.json
           api-key: user:16832256:680
           api-secret: ${{ secrets.CLIENT_SECRET }}
@@ -128,16 +102,15 @@ jobs:
           upload_url:
             ${{ needs.create-github-release-draft.outputs.upload_url  }}
           asset_path:
-            releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
+            releases/usos-srednia-${{ needs.create-github-release-draft.outputs.tag }}.zip
           asset_name:
-            usos-srednia-firefox-${{ needs.has-changed.outputs.version  }}.zip
+            usos-srednia-firefox-${{ needs.create-github-release-draft.outputs.tag }}.zip
           asset_content_type: application/zip
 
   github-release-publish:
     runs-on: ubuntu-latest
     needs:
       [
-        'has-changed',
         'create-github-release-draft',
         'firefox-publish',
         'chrome-publish',
