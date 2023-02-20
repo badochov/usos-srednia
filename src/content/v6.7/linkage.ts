@@ -2,103 +2,108 @@ import { Linkage, Program, Subject } from '../types'
 import { fetchInternalHTML, getCell, getTemplate } from '../utils'
 import { cellToSubject } from './common'
 
-export async function getLinkage(): Promise<Linkage[]> {
-  const html = await getLinkageHTML()
-  const template = getTemplate(html)
-  const rows = getLinkageRows(template)
-  return parseLinkages(rows)
-}
 
-function parseLinkages(rows: HTMLTableRowElement[]): Linkage[] {
-  return rows.map(parseLinkage)
-}
+export class LinkageGetter {
+  protected tableSelector = 'table.cycle'
 
-function parseLinkage(row: HTMLTableRowElement): Linkage {
-  const subject = parseSubject(row)
-  const program = parseProgram(row)
-  const [includeInProgram, includeInStage] = parseIncludeIn(row)
+  async getLinkage(): Promise<Linkage[]> {
+    const html = await this.getLinkageHTML()
+    const template = getTemplate(html)
+    const rows = this.getLinkageRows(template)
+    return this.parseLinkages(rows)
+  }
 
-  return { subject, program, includeInProgram, includeInStage }
-}
+  protected parseLinkages(rows: HTMLTableRowElement[]): Linkage[] {
+    return rows.map(row => this.parseLinkage(row))
+  }
 
-function getLinkageRows(template: HTMLTemplateElement): HTMLTableRowElement[] {
-  const tables = getLinkageTables(template)
-  return tables.flatMap(extractRowsFromTable)
-}
+  protected parseLinkage(row: HTMLTableRowElement): Linkage {
+    const subject = this.parseSubject(row)
+    const program = this.parseProgram(row)
+    const [includeInProgram, includeInStage] = this.parseIncludeIn(row)
 
-function extractRowsFromTable(table: HTMLTableElement): HTMLTableRowElement[] {
-  const rows: HTMLTableRowElement[] = []
-  let previousSubjectCell: HTMLTableCellElement | null = null
-  for (const row of Array.from(table.rows)) {
-    if (row.cells.length === 8) {
-      if (row.firstElementChild?.nodeName === 'TH') {
-        // Filter out header row.
-        continue
+    return { subject, program, includeInProgram, includeInStage }
+  }
+
+  protected getLinkageRows(template: HTMLTemplateElement): HTMLTableRowElement[] {
+    const tables = this.getLinkageTables(template)
+    return tables.flatMap(table => this.extractRowsFromTable(table))
+  }
+
+  protected extractRowsFromTable(table: HTMLTableElement): HTMLTableRowElement[] {
+    const rows: HTMLTableRowElement[] = []
+    let previousSubjectCell: HTMLTableCellElement | null = null
+    for (const row of Array.from(table.rows)) {
+      if (row.cells.length === 8) {
+        if (row.firstElementChild?.nodeName === 'TH') {
+          // Filter out header row.
+          continue
+        }
+        previousSubjectCell = row.cells[1]
+        rows.push(row)
+      } else if (row.cells.length === 6) {
+        // Other linkage for same subject
+        const rowCopy = <HTMLTableRowElement>row.cloneNode(true)
+        rowCopy.insertCell(0)
+        const subjectCell = rowCopy.insertCell(1)
+        if (previousSubjectCell !== null) {
+          subjectCell.outerHTML = previousSubjectCell.outerHTML
+        }
+        rows.push(rowCopy)
       }
-      previousSubjectCell = row.cells[1]
-      rows.push(row)
-    } else if (row.cells.length === 6) {
-      // Other linkage for same subject
-      const rowCopy = <HTMLTableRowElement>row.cloneNode(true)
-      rowCopy.insertCell(0)
-      const subjectCell = rowCopy.insertCell(1)
-      if (previousSubjectCell !== null) {
-        subjectCell.outerHTML = previousSubjectCell.outerHTML
-      }
-      rows.push(rowCopy)
+      // Filter out helper rows.
     }
-    // Filter out helper rows.
-  }
-  return rows
-}
-
-function getLinkageTables(template: HTMLTemplateElement): HTMLTableElement[] {
-  const cycles = <NodeListOf<HTMLTableElement>>(
-    template.content.querySelectorAll('table.cycle')
-  )
-  return Array.from(cycles)
-}
-
-async function getLinkageHTML(): Promise<string> {
-  return fetchInternalHTML(
-    'kontroler.php?_action=dla_stud/studia/podpiecia/lista',
-  )
-}
-
-function parseSubject(row: HTMLTableRowElement): Subject {
-  const cell = getCell(row, 1)
-  return cellToSubject(cell)
-}
-
-function parseProgram(row: HTMLTableRowElement): Program {
-  if (!isLinkedToAnyProgram(row)) {
-    return { name: null, stage: null }
+    return rows
   }
 
-  const programCell = getCell(row, 3)
-  const stageCell = getCell(row, 4)
-
-  const name = programCell.textContent?.trim() ?? null
-  let stage = stageCell.textContent?.trim() ?? null
-
-  if (stage === 'BRAK') {
-    stage = null
+  protected getLinkageTables(template: HTMLTemplateElement): HTMLTableElement[] {
+    const cycles = <NodeListOf<HTMLTableElement>>(
+      template.content.querySelectorAll(this.tableSelector)
+    )
+    return Array.from(cycles)
   }
 
-  return { name, stage }
-}
-
-function parseIncludeIn(row: HTMLTableRowElement): [boolean, boolean] {
-  if (!isLinkedToAnyProgram(row)) {
-    return [false, false]
+  protected async getLinkageHTML(): Promise<string> {
+    return fetchInternalHTML(
+      'kontroler.php?_action=dla_stud/studia/podpiecia/lista',
+    )
   }
-  const cell = getCell(row, 5)
-  const text = cell.textContent?.trim() ?? '/'
-  const [inProgram, inStage] = text.split('/')
 
-  return [inProgram.trim() === 'TAK', inStage.trim() === 'TAK']
-}
+  protected parseSubject(row: HTMLTableRowElement): Subject {
+    const cell = getCell(row, 1)
+    return cellToSubject(cell)
+  }
 
-function isLinkedToAnyProgram(row: HTMLTableRowElement): boolean {
-  return row.cells.length > 3
+  protected parseProgram(row: HTMLTableRowElement): Program {
+    if (!this.isLinkedToAnyProgram(row)) {
+      return { name: null, stage: null }
+    }
+
+    const programCell = getCell(row, 3)
+    const stageCell = getCell(row, 4)
+
+    const name = programCell.textContent?.trim() ?? null
+    let stage = stageCell.textContent?.trim() ?? null
+
+    if (stage === 'BRAK') {
+      stage = null
+    }
+
+    return { name, stage }
+  }
+
+  protected parseIncludeIn(row: HTMLTableRowElement): [boolean, boolean] {
+    if (!this.isLinkedToAnyProgram(row)) {
+      return [false, false]
+    }
+    const cell = getCell(row, 5)
+    const text = cell.textContent?.trim() ?? '/'
+    const [inProgram, inStage] = text.split('/')
+
+    return [inProgram.trim() === 'TAK', inStage.trim() === 'TAK']
+  }
+
+  protected isLinkedToAnyProgram(row: HTMLTableRowElement): boolean {
+    return row.cells.length > 3
+  }
 }

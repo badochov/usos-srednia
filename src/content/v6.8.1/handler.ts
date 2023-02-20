@@ -1,12 +1,14 @@
 import { MeanAverageCounter } from '../avgCalc'
 import { avgHandlers } from '../avgHandlers'
-import { Usos6_7Handler } from '../v6.7/handler'
+import { Linkage } from '../types'
+import { Usos6_8_0Handler } from '../v6.8.0/handler'
 import { DefaultGradeRowParser, DefaultGradeTableParser } from './gradeParser'
 import { DefaultGradesTableHandler } from './gradeTable'
+import { LinkageGetter } from './linkage'
 
-export class Usos6_8Handler extends Usos6_7Handler {
+export class Usos6_8_1Handler extends Usos6_8_0Handler {
   handlesVersion(version: string): boolean {
-    return version.startsWith('6.8')
+    return version.startsWith('6.8.1')
   }
 
   async handle(): Promise<void> {
@@ -17,5 +19,9 @@ export class Usos6_8Handler extends Usos6_7Handler {
       new MeanAverageCounter(),
       avgHandlers,
     )
+  }
+
+  protected async getLinkage(): Promise<Linkage[]> {
+      return new LinkageGetter().getLinkage()
   }
 }
