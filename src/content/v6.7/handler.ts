@@ -7,9 +7,10 @@ import {
   GradeTableParser,
   Handler,
   Linkage,
+  Subject,
 } from '../types'
 import { addECTSInfo, copyGrade } from '../utils'
-import { getECTSInfo } from './ects'
+import { ECTSInfoGetter } from './ects'
 import { DefaultGradeRowParser, DefaultGradeTableParser } from './gradeParser'
 import { DefaultGradesTableHandler } from './gradeTable'
 import { LinkageGetter } from './linkage'
@@ -23,14 +24,25 @@ export class Usos6_7Handler implements Handler {
     return this._handle(
       new DefaultGradesTableHandler(),
       new DefaultGradeTableParser(),
-      new DefaultGradeRowParser(),
+      new DefaultGradeRowParser(this.cellToSubject.bind(this)),
       new MeanAverageCounter(),
       avgHandlers,
     )
   }
 
   protected async getLinkage(): Promise<Linkage[]> {
-    return new LinkageGetter().getLinkage()
+    return new LinkageGetter(this.cellToSubject.bind(this)).getLinkage()
+  }
+
+  protected cellToSubject(cell: HTMLTableCellElement): Subject {
+    const code = cell.lastElementChild?.textContent?.trim() || null
+    let name: string
+    if (cell.childElementCount == 1) {
+      name = cell.firstChild?.textContent?.trim() ?? ''
+    } else {
+      name = cell.firstElementChild?.textContent?.trim() ?? ''
+    }
+    return { name, code }
   }
 
   protected async _handle(
@@ -41,7 +53,7 @@ export class Usos6_7Handler implements Handler {
     avgHandlers: AvgHandler[],
   ): Promise<void> {
     const linkages = await this.getLinkage()
-    const ectsInfo = await getECTSInfo()
+    const ectsInfo = await new ECTSInfoGetter(this.cellToSubject.bind(this)).getECTSInfo()
 
     const averagesHandler = () =>
       this.handleAverages(

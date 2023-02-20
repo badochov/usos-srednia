@@ -1,10 +1,10 @@
 import { Linkage, Program, Subject } from '../types'
 import { fetchInternalHTML, getCell, getTemplate } from '../utils'
-import { cellToSubject } from './common'
-
 
 export class LinkageGetter {
   protected tableSelector = 'table.cycle'
+
+  constructor(private cellToSubject: (cell: HTMLTableCellElement) => Subject) { }
 
   async getLinkage(): Promise<Linkage[]> {
     const html = await this.getLinkageHTML()
@@ -13,11 +13,11 @@ export class LinkageGetter {
     return this.parseLinkages(rows)
   }
 
-  protected parseLinkages(rows: HTMLTableRowElement[]): Linkage[] {
+  private parseLinkages(rows: HTMLTableRowElement[]): Linkage[] {
     return rows.map(row => this.parseLinkage(row))
   }
 
-  protected parseLinkage(row: HTMLTableRowElement): Linkage {
+  private parseLinkage(row: HTMLTableRowElement): Linkage {
     const subject = this.parseSubject(row)
     const program = this.parseProgram(row)
     const [includeInProgram, includeInStage] = this.parseIncludeIn(row)
@@ -25,12 +25,12 @@ export class LinkageGetter {
     return { subject, program, includeInProgram, includeInStage }
   }
 
-  protected getLinkageRows(template: HTMLTemplateElement): HTMLTableRowElement[] {
+  private getLinkageRows(template: HTMLTemplateElement): HTMLTableRowElement[] {
     const tables = this.getLinkageTables(template)
     return tables.flatMap(table => this.extractRowsFromTable(table))
   }
 
-  protected extractRowsFromTable(table: HTMLTableElement): HTMLTableRowElement[] {
+  private extractRowsFromTable(table: HTMLTableElement): HTMLTableRowElement[] {
     const rows: HTMLTableRowElement[] = []
     let previousSubjectCell: HTMLTableCellElement | null = null
     for (const row of Array.from(table.rows)) {
@@ -56,25 +56,25 @@ export class LinkageGetter {
     return rows
   }
 
-  protected getLinkageTables(template: HTMLTemplateElement): HTMLTableElement[] {
+  private getLinkageTables(template: HTMLTemplateElement): HTMLTableElement[] {
     const cycles = <NodeListOf<HTMLTableElement>>(
       template.content.querySelectorAll(this.tableSelector)
     )
     return Array.from(cycles)
   }
 
-  protected async getLinkageHTML(): Promise<string> {
+  private async getLinkageHTML(): Promise<string> {
     return fetchInternalHTML(
       'kontroler.php?_action=dla_stud/studia/podpiecia/lista',
     )
   }
 
-  protected parseSubject(row: HTMLTableRowElement): Subject {
+  private parseSubject(row: HTMLTableRowElement): Subject {
     const cell = getCell(row, 1)
-    return cellToSubject(cell)
+    return this.cellToSubject(cell)
   }
 
-  protected parseProgram(row: HTMLTableRowElement): Program {
+  private parseProgram(row: HTMLTableRowElement): Program {
     if (!this.isLinkedToAnyProgram(row)) {
       return { name: null, stage: null }
     }
@@ -92,7 +92,7 @@ export class LinkageGetter {
     return { name, stage }
   }
 
-  protected parseIncludeIn(row: HTMLTableRowElement): [boolean, boolean] {
+  private parseIncludeIn(row: HTMLTableRowElement): [boolean, boolean] {
     if (!this.isLinkedToAnyProgram(row)) {
       return [false, false]
     }
@@ -103,7 +103,7 @@ export class LinkageGetter {
     return [inProgram.trim() === 'TAK', inStage.trim() === 'TAK']
   }
 
-  protected isLinkedToAnyProgram(row: HTMLTableRowElement): boolean {
+  private isLinkedToAnyProgram(row: HTMLTableRowElement): boolean {
     return row.cells.length > 3
   }
 }

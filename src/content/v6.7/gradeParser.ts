@@ -6,10 +6,11 @@ import {
   GradeRowParser,
 } from '../types'
 import { getCell } from '../utils'
-import { cellToSubject } from './common'
 import { GradesTableHandler } from '../types'
 
 export class DefaultGradeRowParser {
+  constructor(private cellToSubject: (cell: HTMLTableCellElement) => Subject) { }
+
   parseRow(
     row: HTMLTableRowElement,
     period: string,
@@ -25,7 +26,7 @@ export class DefaultGradeRowParser {
     return { grades, subject, programs, period }
   }
 
-  protected getGradePrimitives(row: HTMLTableRowElement): GradePrimitive[] {
+  private getGradePrimitives(row: HTMLTableRowElement): GradePrimitive[] {
     if (this.isDeansTwo(row)) {
       return [
         { finalGrade: null, isDeansTwo: true, initialGrade: null, name: null },
@@ -37,7 +38,7 @@ export class DefaultGradeRowParser {
     )
   }
 
-  protected getGradePromitivesFromDiv(gradeDiv: Element): GradePrimitive {
+  private getGradePromitivesFromDiv(gradeDiv: Element): GradePrimitive {
     const nameNode = gradeDiv.firstElementChild
     const ret: GradePrimitive = {
       name: null,
@@ -61,7 +62,7 @@ export class DefaultGradeRowParser {
     return ret
   }
 
-  protected parseGrade(gradeText: string | null): number | null {
+  private parseGrade(gradeText: string | null): number | null {
     if (gradeText === null) {
       return null
     }
@@ -73,7 +74,7 @@ export class DefaultGradeRowParser {
     return grade
   }
 
-  protected isDeansTwo(row: HTMLTableRowElement): boolean {
+  private isDeansTwo(row: HTMLTableRowElement): boolean {
     const cell = getCell(row, 1)
     const text = cell.textContent ?? ''
 
@@ -107,7 +108,7 @@ export class DefaultGradeRowParser {
 
   protected getSubject(row: HTMLTableRowElement): Subject {
     const cell = getCell(row, 0)
-    return cellToSubject(cell)
+    return this.cellToSubject(cell)
   }
 }
 
@@ -129,7 +130,7 @@ export class DefaultGradeTableParser {
     return grades
   }
 
-  protected getPeriodTables(
+  private getPeriodTables(
     tableHandler: GradesTableHandler,
   ): Map<string, HTMLTableSectionElement> {
     const periodNamesTables = tableHandler.getPeriodNames()
@@ -144,7 +145,7 @@ export class DefaultGradeTableParser {
     return ret
   }
 
-  protected getPeriodName(
+  private getPeriodName(
     table: HTMLElement,
     tableHandler: GradesTableHandler,
   ): string {

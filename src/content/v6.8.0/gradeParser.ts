@@ -1,5 +1,4 @@
-import { Program, Subject } from '../types'
-import { cellToSubject } from './common'
+import { Program } from '../types'
 import {
   DefaultGradeRowParser as DefaultGradeRowParserv6_7,
   DefaultGradeTableParser as DefaultGradeTableParserv6_7,
@@ -7,11 +6,6 @@ import {
 import { getCell } from '../utils'
 
 export class DefaultGradeRowParser extends DefaultGradeRowParserv6_7 {
-  protected getSubject(row: HTMLTableRowElement): Subject {
-    const cell = getCell(row, 0)
-    return cellToSubject(cell)
-  }
-
   protected getPrograms(row: HTMLTableRowElement): Program[] {
     const cell = getCell(row, 1)
     if (cell.firstElementChild?.textContent?.trim() === '(niepodpięty)') {

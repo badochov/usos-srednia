@@ -1,65 +1,68 @@
-import { cellToSubject } from './common'
 import { ECTSForSubject, Subject } from '../types'
 import { fetchInternalHTML, getCell, getTemplate } from '../utils'
 
-export async function getECTSInfo(): Promise<ECTSForSubject[]> {
-  const html = await fetchInternalHTML(
-    'kontroler.php?_action=dla_stud/studia/polon',
-  )
-  const template = getTemplate(html)
-  const rows = getECTSInfoRows(template)
-  return parseRows(rows)
-}
+export class ECTSInfoGetter {
+  constructor(private cellToSubject: (cell: HTMLTableCellElement) => Subject) { }
 
-function getECTSInfoRows(template: HTMLTemplateElement): HTMLTableRowElement[] {
-  const ectsTable = getECTSTable(template)
-  if (ectsTable === null) {
-    console.error("Couldn't find ECTS table")
-    return []
+  async getECTSInfo(): Promise<ECTSForSubject[]> {
+    const html = await fetchInternalHTML(
+      'kontroler.php?_action=dla_stud/studia/polon',
+    )
+    const template = getTemplate(html)
+    const rows = this.getECTSInfoRows(template)
+    return this.parseRows(rows)
   }
-  return Array.from(ectsTable.rows).filter((row, i) => {
-    if (i === 0) {
-      return false // Remove header
+
+  private getECTSInfoRows(template: HTMLTemplateElement): HTMLTableRowElement[] {
+    const ectsTable = this.getECTSTable(template)
+    if (ectsTable === null) {
+      console.error("Couldn't find ECTS table")
+      return []
     }
-    return !row.classList.contains('headnote') // Remove info about linkage
-  })
-}
-
-function getECTSTable(template: HTMLTemplateElement): HTMLTableElement | null {
-  return <HTMLTableElement | null>(
-    template.content.querySelector('#p645138 > table:nth-child(4)')
-  )
-}
-
-function parseRows(rows: HTMLTableRowElement[]): ECTSForSubject[] {
-  return rows.map(parseRow)
-}
-
-function parseRow(row: HTMLTableRowElement): ECTSForSubject {
-  return {
-    subject: parseSubject(row),
-    ects: parseECTS(row),
-    cycle: parseCycle(row),
+    return Array.from(ectsTable.rows).filter((row, i) => {
+      if (i === 0) {
+        return false // Remove header
+      }
+      return !row.classList.contains('headnote') // Remove info about linkage
+    })
   }
-}
 
-function parseSubject(row: HTMLTableRowElement): Subject {
-  const subjectCell = getCell(row, 0)
-  return cellToSubject(subjectCell)
-}
-
-function parseECTS(row: HTMLTableRowElement): number {
-  const text = getCell(row, 2).textContent
-  if (text === null) {
-    throw new Error("Couldn't parse ECTS cell text")
+  private getECTSTable(template: HTMLTemplateElement): HTMLTableElement | null {
+    return <HTMLTableElement | null>(
+      template.content.querySelector('#p645138 > table:nth-child(4)')
+    )
   }
-  return parseFloat(text)
-}
 
-function parseCycle(row: HTMLTableRowElement): string {
-  const text = getCell(row, 1).textContent
-  if (text === null) {
-    throw new Error("Couldn't parse cycle cell text")
+  private parseRows(rows: HTMLTableRowElement[]): ECTSForSubject[] {
+    return rows.map(row=>this.parseRow(row))
   }
-  return text.trim()
+
+  private parseRow(row: HTMLTableRowElement): ECTSForSubject {
+    return {
+      subject: this.parseSubject(row),
+      ects: this.parseECTS(row),
+      cycle: this.parseCycle(row),
+    }
+  }
+
+  private parseSubject(row: HTMLTableRowElement): Subject {
+    const subjectCell = getCell(row, 0)
+    return this.cellToSubject(subjectCell)
+  }
+
+  private parseECTS(row: HTMLTableRowElement): number {
+    const text = getCell(row, 2).textContent
+    if (text === null) {
+      throw new Error("Couldn't parse ECTS cell text")
+    }
+    return parseFloat(text)
+  }
+
+  private parseCycle(row: HTMLTableRowElement): string {
+    const text = getCell(row, 1).textContent
+    if (text === null) {
+      throw new Error("Couldn't parse cycle cell text")
+    }
+    return text.trim()
+  }
 }
