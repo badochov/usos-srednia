@@ -8,8 +8,8 @@ Rozszerzenie jest gotowe do pobrania dla
 
 ## Budowanie
 Do zbudowania potrzebne są:
-- Node.js v18.5.0
-- npm 8.13.2
+- Node.js
+- npm
 
 Aby zbudować rozszerzenie należy wykonać:
 ```

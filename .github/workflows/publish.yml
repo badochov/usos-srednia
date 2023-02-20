@@ -13,14 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 19.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 19.x
 
       - name: Check if version has been updated
         id: version_change
-        uses: EndBug/version-check@v1
+        uses: EndBug/version-check@v2
 
       - name: Early exit if version didn't change
         if: steps.version_change.outputs.changed != 'true'
@@ -37,7 +37,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.has-changed.outputs.version }}
           release_name: ${{ needs.has-changed.outputs.version }}
@@ -51,10 +51,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 19.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 19.x
 
       - name: Install deps
         run: npm install
@@ -67,7 +67,7 @@ jobs:
         with:
           refresh-token: ${{ secrets.REFRESH_TOKEN }}
           app-id: lbbbenibppgfmakcjpdchgdkjfeipndb
-          client-id: 697242455057-i7c4ej57piivmio3os5216g4sefg6cdp.apps.googleusercontent.com
+          client-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.CLIENT_SECRET }}
           file-name:
             releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
@@ -76,7 +76,7 @@ jobs:
       - name: Upload to github releases
         uses: actions/upload-release-asset@v1.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url:
             ${{ needs.create-github-release-draft.outputs.upload_url  }}
@@ -93,10 +93,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 19.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 19.x
 
       - name: Change manifest to V2
         # Firefox doesn't support manifest V2
@@ -123,7 +123,7 @@ jobs:
       - name: Upload to github releases
         uses: actions/upload-release-asset@v1.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url:
             ${{ needs.create-github-release-draft.outputs.upload_url  }}
@@ -145,6 +145,6 @@ jobs:
     steps:
       - uses: eregon/publish-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           release_id: ${{ needs.create-github-release-draft.outputs.id }}
