@@ -10,5 +10,8 @@
       ]
     }
   ],
-  "name": "USOS średnia"
+  "name": "USOS średnia",
+  "browser_specific_settings": {
+    "gecko_android": {}
+  }
 }
