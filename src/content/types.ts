@@ -22,7 +22,10 @@ export interface Grade {
   subject: Subject
   programs: Program[]
   period: string
-  ects?: number
+}
+
+export interface ECTSInfoGetter {
+  getECTSInfo(): Promise<ECTSForSubject[]>
 }
 
 export interface ECTSForSubject {
@@ -67,7 +70,7 @@ export interface GradesTableHandler {
   addRow(): HTMLTableRowElement
   formatAverageRow(
     row: HTMLTableRowElement,
-    avg: Average,
+    avg: Promise<Average>,
     label: string,
     color?: string,
   ): void

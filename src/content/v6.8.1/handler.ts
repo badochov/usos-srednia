@@ -2,12 +2,13 @@ import { MeanAverageCounter } from '../avgCalc'
 import { avgHandlers } from '../avgHandlers'
 import { Linkage, Subject } from '../types'
 import { Usos6_8_0Handler } from '../v6.8.0/handler'
-import { DefaultGradeRowParser, DefaultGradeTableParser } from './gradeParser'
-import { DefaultGradesTableHandler } from './gradeTable'
+import { DefaultGradeRowParser, DefaultGradeTableParser } from '../v6.8.0/gradeParser'
+import { DefaultGradesTableHandler } from '../v6.8.0/gradeTable'
 import { LinkageGetter } from './linkage'
+import { DefaultECTSInfoGetter } from '../v6.7/ects'
 
 export class Usos6_8_1Handler extends Usos6_8_0Handler {
-  protected supportedVersions: [number, number, number][] = [[6, 8, 1], [7, 0, 0]]
+  protected supportedVersions: [number, number, number][] = [[6, 8, 1]]
 
   protected cellToSubject(cell: HTMLTableCellElement): Subject {
     switch (cell.childElementCount) {
@@ -60,6 +61,7 @@ export class Usos6_8_1Handler extends Usos6_8_0Handler {
       new DefaultGradeTableParser(),
       new DefaultGradeRowParser(this.cellToSubject.bind(this)),
       new MeanAverageCounter(),
+      new DefaultECTSInfoGetter(this.cellToSubject.bind(this)),
       avgHandlers,
     )
   }

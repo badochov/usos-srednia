@@ -1,7 +1,8 @@
 import { Average } from '../avgCalc'
+import { GradesTableHandler } from '../types'
 import { getCell } from '../utils'
 
-export class DefaultGradesTableHandler {
+export class DefaultGradesTableHandler implements GradesTableHandler {
   protected averageRowClassName = 'average-row'
   protected averageTbodyClassName = 'average-tbody'
   protected averageInputClassName = 'include-in-average-checkbox'
@@ -54,14 +55,18 @@ export class DefaultGradesTableHandler {
 
   formatAverageRow(
     row: HTMLTableRowElement,
-    avg: Average,
+    avg: Promise<Average>,
     label: string,
     color?: string,
   ): void {
     const labelCell = row.insertCell()
     const avgCell = row.insertCell()
     labelCell.innerHTML = label
-    avgCell.textContent = avg.toString()
+    avgCell.innerHTML = '<div class="lds-dual-ring"></div>'
+
+    avg.
+      then(a => avgCell.textContent = a.avgString()).
+      catch(e => console.error(e))
 
     row.style.fontWeight = 'bold'
     avgCell.style.backgroundColor = labelCell.style.backgroundColor =

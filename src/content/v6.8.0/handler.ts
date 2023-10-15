@@ -1,6 +1,7 @@
 import { MeanAverageCounter } from '../avgCalc'
 import { avgHandlers } from '../avgHandlers'
 import { Subject } from '../types'
+import { DefaultECTSInfoGetter } from '../v6.7/ects'
 import { Usos6_7Handler } from '../v6.7/handler'
 import { DefaultGradeRowParser, DefaultGradeTableParser } from './gradeParser'
 import { DefaultGradesTableHandler } from './gradeTable'
@@ -33,6 +34,7 @@ export class Usos6_8_0Handler extends Usos6_7Handler {
       new DefaultGradeTableParser(),
       new DefaultGradeRowParser(this.cellToSubject.bind(this)),
       new MeanAverageCounter(),
+      new DefaultECTSInfoGetter(this.cellToSubject.bind(this)),
       avgHandlers,
     )
   }

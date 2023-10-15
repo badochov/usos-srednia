@@ -5,8 +5,12 @@
       "js": [
         "content/index.ts"
       ],
+      "css": [
+        "content/style.css"
+      ],
       "matches": [
-        "https://*/kontroler.php?_action=dla_stud/studia/oceny/index"
+        "https://*/kontroler.php?_action=dla_stud/studia/oceny/index*",
+        "https://*/kontroler.php?_action=dla_stud%2Fstudia%2Foceny%2Findex*"
       ]
     }
   ],

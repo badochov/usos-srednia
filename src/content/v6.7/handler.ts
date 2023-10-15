@@ -8,9 +8,10 @@ import {
   Handler,
   Linkage,
   Subject,
+  ECTSInfoGetter,
 } from '../types'
-import { addECTSInfo, copyGrade } from '../utils'
-import { ECTSInfoGetter } from './ects'
+import { copyGrade } from '../utils'
+import { DefaultECTSInfoGetter } from './ects'
 import { DefaultGradeRowParser, DefaultGradeTableParser } from './gradeParser'
 import { DefaultGradesTableHandler } from './gradeTable'
 import { LinkageGetter } from './linkage'
@@ -22,13 +23,14 @@ export class Usos6_7Handler implements Handler {
       new DefaultGradeTableParser(),
       new DefaultGradeRowParser(this.cellToSubject.bind(this)),
       new MeanAverageCounter(),
+      new DefaultECTSInfoGetter(this.cellToSubject.bind(this)),
       avgHandlers,
     )
   }
 
   handlesCurrentVersion(): boolean {
     const versionString = this.getUsosVersionString()
-    if(versionString === undefined) {
+    if (versionString === undefined) {
       return false
     }
     const version = this.convertUsosVersion(versionString)
@@ -74,10 +76,11 @@ export class Usos6_7Handler implements Handler {
     gradeTableParser: GradeTableParser,
     gradeRowParser: GradeRowParser,
     avgCounter: AvgCounter,
+    ectsIntoGetter: ECTSInfoGetter,
     avgHandlers: AvgHandler[],
   ): Promise<void> {
     const linkages = await this.getLinkage()
-    const ectsInfo = await new ECTSInfoGetter(this.cellToSubject.bind(this)).getECTSInfo()
+    const ectsInfo = ectsIntoGetter.getECTSInfo()
 
     const averagesHandler = () =>
       this.handleAverages(
@@ -101,7 +104,7 @@ export class Usos6_7Handler implements Handler {
     avgCounter: AvgCounter,
     linkages: Linkage[],
     avgHandlers: AvgHandler[],
-    ectsInfo: ECTSForSubject[],
+    ectsInfo: Promise<ECTSForSubject[]>,
   ) {
     gradesTableHandler.removeOld()
 
@@ -109,10 +112,9 @@ export class Usos6_7Handler implements Handler {
       gradesTableHandler,
       gradeRowParser,
     )
-    const withEcts = addECTSInfo(grades, ectsInfo)
 
     for (const handler of avgHandlers) {
-      const results = handler(withEcts.map(copyGrade), avgCounter, linkages)
+      const results = handler(grades.map(copyGrade), avgCounter, linkages, ectsInfo)
       for (const { avg, label, color } of results) {
         const row = gradesTableHandler.addRow()
         gradesTableHandler.formatAverageRow(row, avg, label, color)

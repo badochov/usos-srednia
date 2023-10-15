@@ -1,7 +1,8 @@
 import { ECTSForSubject, ECTSInfoGetter, Subject } from '../types'
 import { fetchInternalHTML, getCell, getTemplate } from '../utils'
 
-export class DefaultECTSInfoGetter implements ECTSInfoGetter  {
+// TODO backport to older versions
+export class DefaultECTSInfoGetter implements ECTSInfoGetter {
   constructor(private cellToSubject: (cell: HTMLTableCellElement) => Subject) { }
 
   async getECTSInfo(): Promise<ECTSForSubject[]> {
@@ -14,23 +15,17 @@ export class DefaultECTSInfoGetter implements ECTSInfoGetter  {
   }
 
   private getECTSInfoRows(template: HTMLTemplateElement): HTMLTableRowElement[] {
-    const ectsTable = this.getECTSTable(template)
-    if (ectsTable === null) {
-      console.error("Couldn't find ECTS table")
-      return []
-    }
-    return Array.from(ectsTable.rows).filter((row, i) => {
-      if (i === 0) {
-        return false // Remove header
-      }
-      return !row.classList.contains('headnote') // Remove info about linkage
-    })
+    return Array.from(this.getECTSTable(template)).
+      map(table => Array.from(table.rows)).
+      map(rows => rows.filter((row, i) => {
+        return i !== 0 // Remove header
+          && !row.classList.contains('headnote') // Remove info about linkage
+      })).
+      flat()
   }
 
-  private getECTSTable(template: HTMLTemplateElement): HTMLTableElement | null {
-    return <HTMLTableElement | null>(
-      template.content.querySelector('#p645138 > table:nth-child(4)')
-    )
+  private getECTSTable(template: HTMLTemplateElement): NodeListOf<HTMLTableElement> {
+    return template.content.querySelectorAll<HTMLTableElement>('.wrtext > div > table:not(:nth-child(2), .rozliczenie)')
   }
 
   private parseRows(rows: HTMLTableRowElement[]): ECTSForSubject[] {

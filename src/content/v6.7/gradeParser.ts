@@ -68,9 +68,7 @@ export class DefaultGradeRowParser {
     }
     const normalized = gradeText.replace(',', '.')
     const grade = parseFloat(normalized)
-    if (isNaN(grade)) {
-      return null
-    }
+
     return grade
   }
 

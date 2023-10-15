@@ -4,12 +4,12 @@ import {
   GPA4AverageCounter,
   MaxAverageCounter,
 } from './avgCalc'
-import { Grade, Linkage, Program } from './types'
+import { ECTSForSubject, Grade, Linkage, Program } from './types'
 import { copyGrade, programsEqual } from './utils'
 
 export interface AvgData {
   label: string
-  avg: Average
+  avg: Promise<Average>
   color?: string
 }
 
@@ -17,6 +17,7 @@ export type AvgHandler = (
   grades: Grade[],
   avgCounter: AvgCounter,
   linkages: Linkage[],
+  ectsInfo: Promise<ECTSForSubject[]>,
 ) => AvgData[]
 
 // Average handlers to be run.
@@ -52,13 +53,16 @@ function handleProgramToGrade(
         matchingCodes.includes(code) &&
         programs.some(({ name }) => name === pName),
     )
-    res.push({ avg, label: `Średnia za ${pName}` })
+    res.push({ avg: new Promise(res => res(avg)), label: `Średnia za ${pName}` })
   }
 
   return res
 }
 
 function handleMimSpecific(grades: Grade[]): AvgData[] {
+  if (window.location.hostname === "usosweb.mimuw.edu.pl/") {
+    return [];
+  }
   const res = new Array<AvgData[]>()
   res.push(handleMimErasmusAverage(grades))
   res.push(handleAverageForMimCsMaster(grades))
@@ -192,10 +196,7 @@ function handleAverageForRecrutationByCodes(
     sameCodeGradeAction,
   )
 
-  if (avg.isNaN()) {
-    return []
-  }
-  return [{ avg, label }]
+  return [{ avg: new Promise(res => res(avg)), label }]
 }
 
 function handleProgramStageToGrade(
@@ -219,7 +220,7 @@ function handleProgramStageToGrade(
         matchingCodes.includes(code) &&
         programs.some((program) => programsEqual(program, pS)),
     )
-    res.push({ avg, label: `Średnia za ${pS.name} (${pS.stage})` })
+    res.push({ avg: new Promise(res => res(avg)), label: `Średnia za ${pS.name} (${pS.stage})` })
   }
   return res
 }
@@ -235,7 +236,7 @@ function handleYearlyAverage(
     const avg = avgCounter.getAverage(grades, (grade) =>
       grade.period.includes(year),
     )
-    res.push({ avg, label: `Średnia za rok akademicki ${year}` })
+    res.push({ avg: new Promise(res => res(avg)), label: `Średnia za rok akademicki ${year}` })
   }
   return res
 }
@@ -248,10 +249,7 @@ function handleMimErasmusAverage(grades: Grade[]): AvgData[] {
     ({ subject: { code } }) => code?.startsWith('1000-') ?? false,
   )
 
-  if (avg.isNaN()) {
-    return []
-  }
-  return [{ avg, label: `Średnia rankingowa na ERASMUS (MIM UW)` }]
+  return [{ avg: new Promise(res => res(avg)), label: `Średnia rankingowa na ERASMUS (MIM UW)` }]
 }
 
 function getYears(grades: Grade[]): string[] {
@@ -306,10 +304,10 @@ function handleGlobalAverage(
   avgCounter: AvgCounter,
 ): AvgData[] {
   const avg = avgCounter.getAverage(grades)
-  return [{ avg, label: 'Średnia' }]
+  return [{ avg: new Promise(res => res(avg)), label: 'Średnia' }]
 }
 
-function gpa4(grades: Grade[], _: AvgCounter, linkages: Linkage[]): AvgData[] {
+function gpa4(grades: Grade[], _: AvgCounter, linkages: Linkage[], ectsInfo: Promise<ECTSForSubject[]>): AvgData[] {
   const programs = getPrograms(linkages)
 
   const res = new Array<AvgData>()
@@ -320,8 +318,9 @@ function gpa4(grades: Grade[], _: AvgCounter, linkages: Linkage[]): AvgData[] {
     )
     const matchingCodes = matchingLinkages.map(({ subject: { code } }) => code)
 
-    const avg = new GPA4AverageCounter().getAverage(
+    const avg = new GPA4AverageCounter().getAverageAsync(
       grades,
+      ectsInfo,
       ({ subject: { code }, programs }) =>
         matchingCodes.includes(code) &&
         programs.some(({ name }) => name === pName),

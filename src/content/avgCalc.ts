@@ -1,9 +1,8 @@
-import { Grade, GradePrimitive } from './types'
+import { ECTSForSubject, Grade, GradePrimitive } from './types'
+import { findECTSForGrade } from './utils'
 
 export interface Average {
-  get(): number
-  isNaN(): boolean
-  toString(): string
+  avgString(): string
 }
 
 export type GradeFilter = (grade: Grade) => boolean
@@ -16,20 +15,12 @@ export interface AvgCounter {
   ): Average
 }
 
-class AbstractAverage {
+class AbstractAverage implements Average {
   protected avg = 0
 
-  get(): number {
-    return this.avg
-  }
-
-  isNaN(): boolean {
-    return isNaN(this.avg)
-  }
-
-  toString(): string {
-    if (isNaN(this.avg)) {
-      return '-'
+  avgString(): string {
+    if(isNaN(this.avg)){
+      return "-"
     }
     return this.avg.toFixed(2)
   }
@@ -151,11 +142,12 @@ export function sum(nums: number[]): number {
 }
 
 export class GPA4AverageCounter {
-  getAverage(
+  async getAverageAsync(
     grades: Grade[],
+    ectsInfoPromise: Promise<ECTSForSubject[]>,
     gradesFilter?: GradeFilter,
     sameCodeGradeAction?: (grades: Grade[]) => Grade[],
-  ): Average {
+  ): Promise<Average> {
     if (gradesFilter !== undefined) {
       grades = grades.filter(gradesFilter)
     }
@@ -164,15 +156,16 @@ export class GPA4AverageCounter {
       const grouppedByCode = groupByCode(grades)
       grades = grouppedByCode.flatMap((g) => sameCodeGradeAction(g))
     }
-    const parsedGrades = grades.flatMap((g) => this.parseGrade(g))
+    const ectsInfo = await ectsInfoPromise
+    const parsedGrades = grades.flatMap((g) => this.parseGrade(g, ectsInfo))
 
     return new WeightedAverage(parsedGrades)
   }
 
-  protected parseGrade(grade: Grade): WeightedGrade[] {
+  protected parseGrade(grade: Grade, ectsInfo: ECTSForSubject[]): WeightedGrade[] {
     const primGrades = grade.grades.flatMap(this.parseGradePrimitive)
     const gpaPoints = primGrades.map((g) => this.toGpaPoints(g))
-    return gpaPoints.map((pts) => ({ grade: pts, weight: grade.ects ?? 0 }))
+    return gpaPoints.map((pts) => ({ grade: pts, weight: findECTSForGrade(ectsInfo, grade) ?? 0 }))
   }
 
   protected parseGradePrimitive(grade: GradePrimitive): number[] {
