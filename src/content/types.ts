@@ -39,7 +39,7 @@ export interface Linkage {
 }
 
 export interface Handler {
-  handlesVersion(version: string): boolean
+  handlesCurrentVersion(): boolean
   handle(): Promise<void>
 }
 

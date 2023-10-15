@@ -1,38 +1,24 @@
-import { Handler } from './types'
-import { Usos6_7Handler } from './v6.7/handler'
-import { Usos6_8_0Handler } from './v6.8.0/handler'
-import { Usos6_8_1Handler } from './v6.8.1/handler'
-import { Usos7_0_0Handler } from './v7.0.0/handler'
+import { Handler } from "./types"
+import { Usos6_7Handler } from "./v6.7/handler"
+import { Usos6_8_0Handler } from "./v6.8.0/handler"
+import { Usos6_8_1Handler } from "./v6.8.1/handler"
 
-const handlers: Handler[] = [new Usos6_7Handler(), new Usos6_8_0Handler(), new Usos6_8_1Handler(), new Usos7_0_0Handler()]
+export type Version = [number, number, number]
+
+const handlers: Handler[] = [new Usos6_8_1Handler(), new Usos6_8_0Handler(), new Usos6_7Handler()] // In order from newest to oldest
+
+function getHandler(): Handler | undefined {
+  return handlers.find(h => h.handlesCurrentVersion())
+}
 
 async function main() {
-  const version = getUsosVersion()
-  const handler = getHandlerForUsosVersion(version, handlers)
-  if (handler === null) {
-    return
+  let handler = getHandler()
+  if (handler === undefined) {
+    // Fallback
+    handler = handlers[0]
+    console.warn("Couldn't find a handler for current USOSweb version!\nUsing handler for a newest supported version as a fallback.\nIf the extension doesn't work, please create an issue here: https://github.com/badochov/usos-srednia/issues. ")
   }
   await handler.handle()
-}
-
-function getUsosVersion(): string {
-  const version = document.body.textContent?.match(/(?<=USOSweb )\S+/)?.at(0)
-  if (version === undefined) {
-    throw new Error("Couldn't determine USOSweb version")
-  }
-  return version
-}
-
-function getHandlerForUsosVersion(
-  version: string,
-  handlers: Handler[],
-): Handler {
-  for (const handler of handlers) {
-    if (handler.handlesVersion(version)) {
-      return handler
-    }
-  }
-  throw new Error(`No handler for USOSweb version ${version}`)
 }
 
 main()

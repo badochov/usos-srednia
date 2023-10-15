@@ -16,10 +16,6 @@ import { DefaultGradesTableHandler } from './gradeTable'
 import { LinkageGetter } from './linkage'
 
 export class Usos6_7Handler implements Handler {
-  handlesVersion(version: string): boolean {
-    return version.startsWith('6.7')
-  }
-
   async handle(): Promise<void> {
     return this._handle(
       new DefaultGradesTableHandler(),
@@ -28,6 +24,34 @@ export class Usos6_7Handler implements Handler {
       new MeanAverageCounter(),
       avgHandlers,
     )
+  }
+
+  handlesCurrentVersion(): boolean {
+    const versionString = this.getUsosVersionString()
+    if(versionString === undefined) {
+      return false
+    }
+    const version = this.convertUsosVersion(versionString)
+
+    return this.supportedVersions.some(
+      supportedVersion => supportedVersion.every(
+        (a: number, idx: number) => isNaN(a) || a === version[idx]
+      )
+    )
+  }
+
+  protected supportedVersions: [number, number, number][] = [[6, 7, NaN]]
+
+  protected getUsosVersionString(): string | undefined {
+    return document.body.textContent?.match(/(?<=USOSweb )\S+/)?.at(0)
+  }
+
+  protected convertUsosVersion(version: string): [number, number, number] {
+    const split = version.split(".")
+    const major = parseInt(split[0])
+    const minor = parseInt(split[1])
+    const patch = parseInt(split[2]) // May be NaN
+    return [major, minor, patch]
   }
 
   protected async getLinkage(): Promise<Linkage[]> {

@@ -9,5 +9,5 @@
     "noUnusedLocals": true,
     "strict": true,
     "target": "es2018",
-  }
+  },
 }

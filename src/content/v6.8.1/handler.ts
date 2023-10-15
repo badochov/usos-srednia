@@ -7,9 +7,7 @@ import { DefaultGradesTableHandler } from './gradeTable'
 import { LinkageGetter } from './linkage'
 
 export class Usos6_8_1Handler extends Usos6_8_0Handler {
-  handlesVersion(version: string): boolean {
-    return version.startsWith('6.8.1')
-  }
+  protected supportedVersions: [number, number, number][] = [[6, 8, 1], [7, 0, 0]]
 
   protected cellToSubject(cell: HTMLTableCellElement): Subject {
     switch (cell.childElementCount) {
