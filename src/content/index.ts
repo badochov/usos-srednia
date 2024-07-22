@@ -10,7 +10,7 @@ export type Version = [number, number, number]
 // TODO add USOS 6.6.0 handler, as it's used on AGH.
 // TODO add support for english version of USOS, note use HTML lang
 // TODO english version URL is not recognised https://usosweb.mimuw.edu.pl/kontroler.php?_action=dla_stud%2Fstudia%2Foceny%2Findex&lang=en
-// TODO add support for matching cycles to ECST value
+// TODO add support for matching cycles to ECTS value
 const handlers: Handler[] = [new Usos7_0_0Handler(), new Usos6_8_1Handler(), new Usos6_8_0Handler(), new Usos6_7Handler()] // In order from newest to oldest
 
 function getHandler(): Handler | undefined {
@@ -22,7 +22,7 @@ async function main() {
   if (handler === undefined) {
     // Fallback
     handler = handlers[0]
-    console.warn("Couldn't find a handler for current USOSweb version!\nUsing handler for a newest supported version as a fallback.\nIf the extension doesn't work, please create an issue here: https://github.com/badochov/usos-srednia/issues. ")
+    console.warn("Couldn't find a handler for current USOSweb version!\nUsing handler for a newest supported version as a fallback.\nIf the extension doesn't work, please create an issue here: https://github.com/badochov/usos-srednia/issues.")
   }
   await handler.handle()
 }

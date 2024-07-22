@@ -42,7 +42,7 @@ Rozszerzenie można prosto rozszerzyć o własne średnie dodając własną funk
 
 ## MIMUW
 ### Dodatkowe średnie
-- [Średnia rekrutacyjna na magisterkę z Matematyki](https://www.mimuw.edu.pl/sites/default/files/lista_srednia_2stopien-mat.pdf)
-- [Średnia rekrutacyjna na magisterkę z Informatyki](https://www.mimuw.edu.pl/sites/default/files/lista_srednia_2stopien-inf.pdf)
-- [Średnia rankingowa na wyjazd ERASMUS](https://www.mimuw.edu.pl/~azator/Erasmus-info-2023-24.pdf)
+- [Średnia rekrutacyjna na magisterkę z Matematyki](https://irk.uw.edu.pl/pl/offer/PELNE2024/programme/S2-MAT)
+- [Średnia rekrutacyjna na magisterkę z Informatyki](https://irk.uw.edu.pl/pl/offer/PELNE2024/programme/S2-INF)
+- [Średnia rankingowa na wyjazd ERASMUS](https://www.mimuw.edu.pl/~azator/Erasmus/Erasmus-2024.pdf)
 
