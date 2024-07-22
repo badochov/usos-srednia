@@ -18,6 +18,7 @@ export default {
     format: 'esm',
     chunkFileNames: path.join('chunks','[name]-[hash].js'),
   },
+  cache: true, // cache must be explicitely enabled in production to produce releases as `rollup-plugin-zip` is old and depends on it.
   plugins: [
     replace({
       'process.env.NODE_ENV': isProduction ? JSON.stringify( 'production' ) : JSON.stringify( 'development' ),
