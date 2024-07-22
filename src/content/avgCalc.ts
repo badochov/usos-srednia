@@ -19,7 +19,7 @@ class AbstractAverage implements Average {
   protected avg = 0
 
   avgString(): string {
-    if(isNaN(this.avg)){
+    if (isNaN(this.avg)) {
       return "-"
     }
     return this.avg.toFixed(2)
@@ -89,6 +89,7 @@ export class MaxAverageCounter {
     grades: Grade[],
     gradesFilter?: GradeFilter,
     sameCodeGradeAction?: (grades: Grade[]) => Grade[],
+    ignoreFails?: boolean
   ): Average {
     if (gradesFilter !== undefined) {
       grades = grades.filter((g) => gradesFilter(g))
@@ -97,7 +98,10 @@ export class MaxAverageCounter {
       const grouppedByCode = groupByCode(grades)
       grades = grouppedByCode.flatMap((g) => sameCodeGradeAction(g))
     }
-    const parsedGrades = grades.flatMap((g) => this.parseGrade(g))
+    let parsedGrades = grades.flatMap((g) => this.parseGrade(g))
+    if (ignoreFails === true) {
+      parsedGrades = parsedGrades.filter(g => g !== 2)
+    }
 
     return new DefaultAverage(parsedGrades)
   }
@@ -110,9 +114,7 @@ export class MaxAverageCounter {
     if (grade.isDeansTwo) {
       return [2]
     }
-    const grades: number[] = <number[]>(
-      [grade.initialGrade, grade.finalGrade].filter((g) => g !== null)
-    )
+    const grades = [grade.initialGrade, grade.finalGrade].filter((g) => g !== null)
     if (grades.length === 0) {
       return []
     }

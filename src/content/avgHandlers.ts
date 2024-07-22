@@ -2,10 +2,11 @@ import {
   Average,
   AvgCounter,
   GPA4AverageCounter,
+  GradeFilter,
   MaxAverageCounter,
 } from './avgCalc'
 import { ECTSForSubject, Grade, Linkage, Program } from './types'
-import { copyGrade, programsEqual } from './utils'
+import { programsEqual } from './utils'
 
 export interface AvgData {
   label: string
@@ -140,7 +141,7 @@ function handleAverageForMimCsMaster(grades: Grade[]) {
       '1000-212bPO', // programowanie obiektowe
       '1000-222bIPP', // indywidualny projekt programistyczny
       '1000-213bASD', // algorytmy i struktury danych
-      '1000-2N09ZBD', // bazy danych
+      '1000-213bBAD', // bazy danych
       '1000-213bPW', // programowanie współbieżne
       '1000-214bSOB', // systemy operacyjne
       '1000-214b', // systemy operacyjne
@@ -171,29 +172,13 @@ function handleAverageForRecrutationByCodes(
   label: string,
   grades: Grade[],
 ): AvgData[] {
-  const gradesToCount: Grade[][] = []
-  for (const c of codes) {
-    const cGrades = grades.filter(
-      ({ subject: { code } }) => code === c,
-    )
-    if (cGrades.length > 0) {
-      gradesToCount.push(cGrades)
-    }
-  }
+  const onlyWithMatchingCodeFilter: GradeFilter = (g: Grade) => g.subject.code !== null && codes.includes(g.subject.code)
 
-  const sameCodeGradeAction = (grades: Grade[]) => {
-    if (grades.length === 0) {
-      return []
-    }
-    const firstGrade = copyGrade(grades[0])
-    firstGrade.grades = grades.flatMap(({ grades }) => grades)
-
-    return [firstGrade]
-  }
   const avg = new MaxAverageCounter().getAverage(
-    gradesToCount.flat(),
+    grades,
+    onlyWithMatchingCodeFilter,
     undefined,
-    sameCodeGradeAction,
+    true
   )
 
   return [{ avg: new Promise(res => res(avg)), label }]
