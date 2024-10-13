@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "lib": ["dom", "es2022"],
+    "lib": ["dom", "es2022", "dom.iterable"],
     "module": "ESNext",
     "moduleResolution": "node",
     "noImplicitReturns": true,

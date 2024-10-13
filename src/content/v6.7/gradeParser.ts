@@ -143,7 +143,7 @@ export class DefaultGradeTableParser {
     return ret
   }
 
-  private getPeriodName(
+  protected getPeriodName(
     table: HTMLElement,
     tableHandler: GradesTableHandler,
   ): string {
