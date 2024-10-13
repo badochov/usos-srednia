@@ -19,28 +19,28 @@
     "start": "rollup -c -w"
   },
   "dependencies": {
-    "@rollup/plugin-replace": "^5.0.7",
-    "@types/chrome": "^0.0.268",
+    "@rollup/plugin-replace": "^6.0.1",
+    "@types/chrome": "^0.0.277",
     "@types/firefox-webext-browser": "^120.0.4",
     "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.7.0",
-    "@rollup/plugin-alias": "^5.1.0",
-    "@rollup/plugin-commonjs": "^26.0.1",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@eslint/js": "^9.12.0",
+    "@rollup/plugin-alias": "^5.1.1",
+    "@rollup/plugin-commonjs": "^28.0.0",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.0",
     "@types/eslint__js": "^8.42.3",
     "cross-env": "^7.0.3",
-    "eslint": "^8.57.0",
+    "eslint": "^9.12.0",
     "prettier": "^3.3.3",
-    "rollup": "^4.19.0",
-    "rollup-plugin-chrome-extension": "^3.6.1",
+    "rollup": "^4.24.0",
+    "rollup-plugin-chrome-extension": "^3.6.12",
     "rollup-plugin-empty-dir": "^1.0.5",
     "rollup-plugin-zip": "^1.0.3",
-    "tslib": "^2.6.3",
-    "typescript": "^5.5.3",
-    "typescript-eslint": "^7.16.1"
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.8.1"
   },
   "overrides": {
     "rollup-plugin-empty-dir": {
