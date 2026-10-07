@@ -41,9 +41,12 @@ export interface Linkage {
   includeInStage: boolean
 }
 
+export type Version = [number, number, number]
+
 export interface Handler {
   handlesCurrentVersion(): boolean
   handle(): Promise<void>
+  getMinimumSupportedVersion(): Version
 }
 
 export interface GradeRowParser {

@@ -42,6 +42,10 @@ export class Usos6_7Handler implements Handler {
     )
   }
 
+  getMinimumSupportedVersion(): [number, number, number] {
+    return [6, 7, 0]
+  }
+
   protected supportedVersions: [number, number, number][] = [[6, 7, NaN]]
 
   protected getUsosVersionString(): string | undefined {
