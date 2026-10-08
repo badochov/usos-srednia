@@ -5,22 +5,25 @@ on:
     branches: ['main']
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   has-changed:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version_change.outputs.version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
-      - name: Use Node.js 19.x
-        uses: actions/setup-node@v3
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v7
         with:
-          node-version: 19.x
+          node-version: 24.x
 
       - name: Check if version has been updated
         id: version_change
-        uses: EndBug/version-check@v2
+        uses: EndBug/version-check@v3
 
       - name: Early exit if version didn't change
         if: steps.version_change.outputs.changed != 'true'
@@ -29,18 +32,12 @@ jobs:
   create-github-release-draft:
     runs-on: ubuntu-latest
     needs: has-changed
-    outputs:
-      id: ${{ steps.create_release.outputs.id }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Create Draft Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.has-changed.outputs.version }}
-          release_name: ${{ needs.has-changed.outputs.version }}
+          name: ${{ needs.has-changed.outputs.version }}
           draft: true
           prerelease: false
 
@@ -49,12 +46,12 @@ jobs:
     needs: ['has-changed', 'create-github-release-draft']
     environment: chrome-publish
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
-      - name: Use Node.js 19.x
-        uses: actions/setup-node@v3
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v7
         with:
-          node-version: 19.x
+          node-version: 24.x
 
       - name: Install deps
         run: npm install
@@ -63,46 +60,43 @@ jobs:
         run: npm run release
 
       - name: Chrome Extension upload & publish
-        uses: Passiverecords/chrome-extension-upload-action@1.4.1
+        uses: mnao305/chrome-extension-upload@v7
         with:
-          refresh-token: ${{ secrets.REFRESH_TOKEN }}
-          app-id: lbbbenibppgfmakcjpdchgdkjfeipndb
+          file-path:
+            releases/usos-srednia-${{ needs.has-changed.outputs.version }}.zip
+          extension-id: lbbbenibppgfmakcjpdchgdkjfeipndb
+          publisher-id: ${{ secrets.PUBLISHER_ID }}
           client-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.CLIENT_SECRET }}
-          file-name:
-            releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
+          refresh-token: ${{ secrets.REFRESH_TOKEN }}
           publish: true
 
-      - name: Upload to github releases
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare GitHub release asset
+        run:
+          cp "releases/usos-srednia-${{ needs.has-changed.outputs.version
+          }}.zip" "releases/usos-srednia-chrome-${{
+          needs.has-changed.outputs.version }}.zip"
+
+      - name: Upload Chrome release asset
+        uses: softprops/action-gh-release@v3
         with:
-          upload_url:
-            ${{ needs.create-github-release-draft.outputs.upload_url  }}
-          asset_path:
-            releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
-          asset_name:
-            usos-srednia-chrome-${{ needs.has-changed.outputs.version  }}.zip
-          asset_content_type: application/zip
+          tag_name: ${{ needs.has-changed.outputs.version }}
+          draft: true
+          files:
+            releases/usos-srednia-chrome-${{ needs.has-changed.outputs.version
+            }}.zip
 
   firefox-publish:
     runs-on: ubuntu-latest
     needs: ['has-changed', 'create-github-release-draft']
     environment: firefox-publish
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
-      - name: Use Node.js 19.x
-        uses: actions/setup-node@v3
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v7
         with:
-          node-version: 19.x
-
-      - name: Change manifest to V2
-        # Firefox doesn't support manifest V2
-        run:
-          echo "`jq '.manifest_version = 2' src/manifest.json`" >
-          src/manifest.json
+          node-version: 24.x
 
       - name: Install deps
         run: npm install
@@ -110,28 +104,30 @@ jobs:
       - name: Build
         run: npm run release
 
-      - name: Upload to firefox addons
-        uses: trmcnvn/firefox-addon@v1
+      - name: Sign and publish Firefox extension
+        uses: kewisch/action-web-ext@v2
         with:
-          uuid: '{7738ac86-b5b2-4372-bc2b-1c371631bd73}'
-          xpi:
-            releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
-          manifest: dist/manifest.json
-          api-key: user:16832256:680
-          api-secret: ${{ secrets.CLIENT_SECRET }}
+          cmd: sign
+          source:
+            releases/usos-srednia-${{ needs.has-changed.outputs.version }}.zip
+          channel: listed
+          apiKey: user:16832256:680
+          apiSecret: ${{ secrets.CLIENT_SECRET }}
 
-      - name: Upload to github releases
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare GitHub release asset
+        run:
+          cp "releases/usos-srednia-${{ needs.has-changed.outputs.version
+          }}.zip" "releases/usos-srednia-firefox-${{
+          needs.has-changed.outputs.version }}.zip"
+
+      - name: Upload Firefox release asset
+        uses: softprops/action-gh-release@v3
         with:
-          upload_url:
-            ${{ needs.create-github-release-draft.outputs.upload_url  }}
-          asset_path:
-            releases/usos-srednia-${{ needs.has-changed.outputs.version  }}.zip
-          asset_name:
-            usos-srednia-firefox-${{ needs.has-changed.outputs.version  }}.zip
-          asset_content_type: application/zip
+          tag_name: ${{ needs.has-changed.outputs.version }}
+          draft: true
+          files:
+            releases/usos-srednia-firefox-${{ needs.has-changed.outputs.version
+            }}.zip
 
   github-release-publish:
     runs-on: ubuntu-latest
@@ -143,8 +139,9 @@ jobs:
         'chrome-publish',
       ]
     steps:
-      - uses: eregon/publish-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v3
         with:
-          release_id: ${{ needs.create-github-release-draft.outputs.id }}
+          tag_name: ${{ needs.has-changed.outputs.version }}
+          draft: false
+          prerelease: false
