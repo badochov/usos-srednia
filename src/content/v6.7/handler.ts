@@ -42,7 +42,13 @@ export class Usos6_7Handler implements Handler {
 
     for (let index = 0; index < version.length; index++) {
       if (version[index] !== minimumVersion[index]) {
-        return version[index] > minimumVersion[index]
+        if (version[index] < minimumVersion[index]) {
+          return false
+        }
+        console.warn(
+          `USOSweb ${versionString} does not exactly match a supported version. Using the handler for ${minimumVersion.join('.')}.`,
+        )
+        return true
       }
     }
     return true
