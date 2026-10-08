@@ -60,7 +60,7 @@ jobs:
         run: npm run release
 
       - name: Chrome Extension upload & publish
-        uses: mnao305/chrome-extension-upload@v7
+        uses: mnao305/chrome-extension-upload@v7.0.0
         with:
           file-path:
             releases/usos-srednia-${{ needs.has-changed.outputs.version }}.zip
