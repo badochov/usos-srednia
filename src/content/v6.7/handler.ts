@@ -49,11 +49,10 @@ export class Usos6_7Handler implements Handler {
   }
 
   getMinimumSupportedVersion(): [number, number, number] {
-    const [major, minor, patch] = this.supportedVersions[0]
-    return [major, minor, Number.isNaN(patch) ? 0 : patch]
+    return this.minimumSupportedVersion
   }
 
-  protected supportedVersions: [number, number, number][] = [[6, 7, NaN]]
+  protected minimumSupportedVersion: [number, number, number] = [6, 7, 0]
 
   protected getUsosVersionString(): string | undefined {
     return document.body.textContent?.match(/(?<=USOSweb )\S+/)?.at(0)

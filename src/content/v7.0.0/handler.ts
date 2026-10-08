@@ -6,7 +6,7 @@ import { Usos6_8_1Handler } from '../v6.8.1/handler'
 import { DefaultECTSInfoGetter } from './ects'
 
 export class Usos7_0_0Handler extends Usos6_8_1Handler {
-  protected supportedVersions: [number, number, number][] = [[7, 0, 0]]
+  protected minimumSupportedVersion: [number, number, number] = [7, 0, 0]
 
   async handle(): Promise<void> {
     if (document.documentElement.lang !== "pl") {
