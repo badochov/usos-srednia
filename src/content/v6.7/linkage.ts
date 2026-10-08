@@ -83,7 +83,7 @@ export class LinkageGetter {
     const stageCell = getCell(row, 4)
 
     const name = programCell.textContent?.trim() ?? null
-    let stage = stageCell.textContent?.trim() ?? null
+    let stage: string | null = stageCell.textContent?.trim() ?? null
 
     if (stage === 'BRAK') {
       stage = null
