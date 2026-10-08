@@ -34,15 +34,31 @@ export class Usos6_7Handler implements Handler {
       return false
     }
     const version = this.convertUsosVersion(versionString)
+    const minimumVersion = this.getMinimumSupportedVersion()
 
-    return this.supportedVersions.some(
-      supportedVersion => supportedVersion.every(
-        (a: number, idx: number) => isNaN(a) || a === version[idx]
-      )
-    )
+    if (!version.every(Number.isFinite)) {
+      return false
+    }
+
+    for (let index = 0; index < version.length; index++) {
+      if (version[index] !== minimumVersion[index]) {
+        if (version[index] < minimumVersion[index]) {
+          return false
+        }
+        console.warn(
+          `USOSweb ${versionString} does not exactly match a supported version. Using the handler for ${minimumVersion.join('.')}.`,
+        )
+        return true
+      }
+    }
+    return true
   }
 
-  protected supportedVersions: [number, number, number][] = [[6, 7, NaN]]
+  getMinimumSupportedVersion(): [number, number, number] {
+    return this.minimumSupportedVersion
+  }
+
+  protected minimumSupportedVersion: [number, number, number] = [6, 7, 0]
 
   protected getUsosVersionString(): string | undefined {
     return document.body.textContent?.match(/(?<=USOSweb )\S+/)?.at(0)
@@ -52,7 +68,7 @@ export class Usos6_7Handler implements Handler {
     const split = version.split(".")
     const major = parseInt(split[0])
     const minor = parseInt(split[1])
-    const patch = parseInt(split[2]) // May be NaN
+    const patch = parseInt(split[2]) || 0
     return [major, minor, patch]
   }
 

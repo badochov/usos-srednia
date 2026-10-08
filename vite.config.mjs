@@ -9,7 +9,7 @@ const { version } = JSON.parse(
   readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
 )
 
-const plugins = [crx({ manifest })]
+const plugins = [crx({ manifest: { ...manifest, version } })]
 
 if (process.env.RELEASE === 'true') {
   plugins.push(

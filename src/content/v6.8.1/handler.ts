@@ -8,7 +8,7 @@ import { LinkageGetter } from './linkage'
 import { DefaultECTSInfoGetter } from '../v6.7/ects'
 
 export class Usos6_8_1Handler extends Usos6_8_0Handler {
-  protected supportedVersions: [number, number, number][] = [[6, 8, 1]]
+  protected minimumSupportedVersion: [number, number, number] = [6, 8, 1]
 
   protected cellToSubject(cell: HTMLTableCellElement): Subject {
     switch (cell.childElementCount) {

@@ -22,8 +22,8 @@ async function main() {
   let handler = getHandler()
   if (handler === undefined) {
     // Fallback
-    handler = handlers[0]
-    console.warn("Couldn't find a handler for current USOSweb version!\nUsing handler for a newest supported version as a fallback.\nIf the extension doesn't work, please create an issue here: https://github.com/badochov/usos-srednia/issues.")
+    handler = handlers.at(-1)
+    console.warn("Couldn't find a handler for current USOSweb version!\nUsing handler for the oldest supported version as a fallback.\nIf the extension doesn't work, please create an issue here: https://github.com/badochov/usos-srednia/issues.")
   }
   await handler.handle()
 }
