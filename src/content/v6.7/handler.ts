@@ -34,16 +34,23 @@ export class Usos6_7Handler implements Handler {
       return false
     }
     const version = this.convertUsosVersion(versionString)
+    const minimumVersion = this.getMinimumSupportedVersion()
 
-    return this.supportedVersions.some(
-      supportedVersion => supportedVersion.every(
-        (a: number, idx: number) => isNaN(a) || a === version[idx]
-      )
-    )
+    if (!version.every(Number.isFinite)) {
+      return false
+    }
+
+    for (let index = 0; index < version.length; index++) {
+      if (version[index] !== minimumVersion[index]) {
+        return version[index] > minimumVersion[index]
+      }
+    }
+    return true
   }
 
   getMinimumSupportedVersion(): [number, number, number] {
-    return [6, 7, 0]
+    const [major, minor, patch] = this.supportedVersions[0]
+    return [major, minor, Number.isNaN(patch) ? 0 : patch]
   }
 
   protected supportedVersions: [number, number, number][] = [[6, 7, NaN]]
@@ -56,7 +63,7 @@ export class Usos6_7Handler implements Handler {
     const split = version.split(".")
     const major = parseInt(split[0])
     const minor = parseInt(split[1])
-    const patch = parseInt(split[2]) // May be NaN
+    const patch = parseInt(split[2]) || 0
     return [major, minor, patch]
   }
 
