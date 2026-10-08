@@ -65,10 +65,10 @@ jobs:
           file-path:
             releases/usos-srednia-${{ needs.has-changed.outputs.version }}.zip
           extension-id: lbbbenibppgfmakcjpdchgdkjfeipndb
-          publisher-id: ${{ secrets.PUBLISHER_ID }}
-          client-id: ${{ secrets.CLIENT_ID }}
-          client-secret: ${{ secrets.CLIENT_SECRET }}
-          refresh-token: ${{ secrets.REFRESH_TOKEN }}
+          publisher-id: ${{ secrets.CHROME_PUBLISHER_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
           publish: true
 
       - name: Prepare GitHub release asset
@@ -111,8 +111,8 @@ jobs:
           source:
             releases/usos-srednia-${{ needs.has-changed.outputs.version }}.zip
           channel: listed
-          apiKey: user:16832256:680
-          apiSecret: ${{ secrets.CLIENT_SECRET }}
+          apiKey: ${{ secrets.AMO_API_KEY }}
+          apiSecret: ${{ secrets.AMO_API_SECRET }}
 
       - name: Prepare GitHub release asset
         run:
