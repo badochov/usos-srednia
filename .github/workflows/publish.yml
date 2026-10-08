@@ -111,6 +111,7 @@ jobs:
           source:
             releases/usos-srednia-${{ needs.has-changed.outputs.version }}.zip
           channel: listed
+          approvalTimeout: 0
           apiKey: ${{ secrets.AMO_API_KEY }}
           apiSecret: ${{ secrets.AMO_API_SECRET }}
 
