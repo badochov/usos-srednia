@@ -16,6 +16,9 @@
   ],
   "name": "USOS średnia",
   "browser_specific_settings": {
+    "gecko": {
+      "id": "{7738ac86-b5b2-4372-bc2b-1c371631bd73}"
+    },
     "gecko_android": {}
   }
 }
